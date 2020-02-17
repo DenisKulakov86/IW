@@ -1,0 +1,15 @@
+<div class="mat-h2 title" mat-dialog-title>
+    {{data.title}}
+    <button mat-icon-button [mat-dialog-close]="">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+<div mat-dialog-content>
+    <mat-form-field>
+        <input matInput [(ngModel)]="data.text" autocomplete="off" cdkFocusInitial #inputNameFolder>
+    </mat-form-field>
+</div>
+<div mat-dialog-actions>
+    <button mat-flat-button color="primary" [mat-dialog-close]="data.text" >Создать</button>
+    <button mat-button (click)="onNoClick()">Отмена</button>
+</div>

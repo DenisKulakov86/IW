@@ -1,0 +1,93 @@
+<!-- <button *ngIf="!(isSignedIn$ | async)" (click)="signIn()" mat-flat-button color="primary">
+  SignIn
+</button>
+<button *ngIf="isSignedIn$ | async" (click)="signOut()" mat-flat-button color="primary">
+  SignOut
+</button> -->
+
+
+
+<!-- <div class="dark-theme"> -->
+
+    
+<mat-toolbar>
+    <button *ngIf="(breadcrumbs$ | async)?.id !== 'root' || isNewFile" mat-icon-button (click)="navigateTo()">
+        <mat-icon>arrow_back</mat-icon>
+    </button>
+
+    <span>{{(breadcrumbs$ | async)?.name}} </span>
+</mat-toolbar>
+<!-- <mat-progress-bar class="load-bar" *ngIf="driveStore.loading$ | async" mode="indeterminate"></mat-progress-bar> -->
+
+<ul class="control-list">
+    <li>
+        <button (click)="crateFile()" mat-button color="primary"> Create File </button>
+    </li>
+    <li>
+        <button (click)="openDialog()" mat-button color="primary"> Create Folder </button>
+    </li>
+</ul>
+
+<ng-template [ngTemplateOutlet]="loadTemplate()"></ng-template>
+
+<ng-template #matListTemplate>
+    <mat-action-list class="containter" [disableRipple]='true'>
+        <mat-list-item [class.active]="selectedFile === file" *ngFor="let file of list$ | async">
+
+            <div class="file-info" (click)="onSelected(file)">
+                <img src="{{file.iconLink}}" alt="">
+
+                <div class="file-info__text">
+                    <span class="file-info__name" matLine>{{file.name}} </span>
+                    <span matLine>{{file.modifiedByMeTime | date:"EE, d MMM yyyy"}}</span>
+                </div>
+
+            </div>
+            <button class="more-vert" mat-icon-button [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+            </button>
+
+            <mat-menu [xPosition]="'before'" #menu="matMenu">
+                <button (click)="deleteFile(file)" mat-menu-item> Удалить </button>
+            </mat-menu>
+            <!-- <mat-divider></mat-divider> -->
+        </mat-list-item>
+    </mat-action-list>
+</ng-template>
+
+<ng-template #fileTemplate>
+    <ng-container *ngIf="!(driveStore.loading$ | async)">
+
+        <form [formGroup]='fg' [appConnectFormControl]="(file$ | async)" class="form" (ngSubmit)="saveFile()">
+            <mat-form-field>
+                <input formControlName='name' matInput placeholder="Имя файла">
+            </mat-form-field>
+            <mat-form-field>
+                <textarea formControlName='text' cdkTextareaAutosize matInput
+                    placeholder="Содержание файла"> </textarea>
+            </mat-form-field>
+            <button [disabled]="fg.invalid" mat-raised-button color="primary"> Сохранить </button>
+        </form>
+        <!-- <mat-form-field class="full-width">
+            <input matInput [formControl]="fcInput" placeholder="Имя файла">
+        </mat-form-field>
+        <mat-form-field class="full-width">
+            <textarea [appConnectFormControl]="(file$ | async)?.body" [formControl]="fcTextarea" cdkTextareaAutosize
+                matInput placeholder="Содержание файла">
+        </textarea>
+        </mat-form-field> -->
+        <!-- <button (click)="saveFile()" [disabled]="!(fcTextarea.valid && fcInput.valid)" mat-raised-button
+            color="primary"> Сохранить
+        </button> -->
+
+    </ng-container>
+</ng-template>
+
+
+
+
+<div class="log">
+    <pre>    {{ pre$ | async | json }}  </pre>
+</div>
+
+<!-- </div> -->

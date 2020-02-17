@@ -1,0 +1,19 @@
+.title{
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+}
+
+
+.actions{
+    display: flex;
+    justify-content: flex-end;
+    // margin-bottom: 0;
+}
+.mat-form-field{
+    width: 100%;
+}
+
+:host {
+      box-sizing: content-box;
+}

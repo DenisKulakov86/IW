@@ -1,0 +1,26 @@
+@import '~@angular/material/theming';
+@include mat-core();
+
+@import 'vars';
+
+/* ======== Angular material custom themes ======== */ 
+
+
+.green-theme{
+    $iw-primary: mat-palette($mat-green);
+    $iw-accent: mat-palette($mat-amber, A200, A100, A400);
+    $iw-warn: mat-palette($mat-red);
+
+    $iw-light-theme: mat-light-theme($iw-primary, $iw-accent, $iw-warn);
+    $iw-dark-theme: mat-dark-theme($iw-primary, $iw-accent, $iw-warn);
+
+    @include angular-material-theme($iw-light-theme);
+    @include custom-theme($iw-light-theme);
+    
+    &.dark-theme {
+        @include angular-material-theme($iw-dark-theme);
+    } 
+}
+
+
+

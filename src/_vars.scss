@@ -1,0 +1,24 @@
+// Тест кастем тема
+@mixin custom-theme($theme) {
+    $primary: map-get($theme, primary);
+    $accent: map-get($theme, accent);
+    $foreground: map-get($theme, foreground);
+    $background: map-get($theme, background);
+  
+    .active, .active:focus {
+      background-color: mat-color($primary, 100) !important;
+  
+      // background-color: mat-color($background);
+      // .mat-line{
+      //   color: mat-color($foreground, text);
+      // }
+    }
+  
+    .text-primary {
+      color: mat-color($primary);
+    }
+    .text-accent{
+      color:  mat-color($accent);
+    }
+  }
+

@@ -1,0 +1,162 @@
+<mat-toolbar [class.mat-elevation-z6]="isShodow$ | async">
+  <button mat-icon-button (click)="goBack()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>{{ title$ | async }} </span>
+  <button
+    (click)="save()"
+    class="save-btn"
+    [disabled]="formSale.invalid"
+    mat-raised-button
+    color="primary"
+  >
+    Сохранить
+  </button>
+</mat-toolbar>
+
+<section *ngIf="!(loading$ | async); else loading" class="container-page ">
+  <h2 class="date">
+    {{ date$ | async | date: "EE, d MMM yyyy" }}
+  </h2>
+
+  <form
+    class="form"
+    [formGroup]="formSale"
+    [appConnectFormGroup]="sale$ | async"
+    [style.fontSize.px]="16"
+  >
+    <!-- Discount -->
+    <mat-card class="form__discount">
+      <mat-form-field class="form__discount-input">
+        <input
+          formControlName="discount"
+          type="number"
+          min="0"
+          autocomplete="off"
+          matInput
+          placeholder="Скидка"
+          [errorStateMatcher]="matcher"
+        />
+        <button type="button" mat-icon-button matSuffix (click)="clearValue(discount)">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-error> {{ discountError() }} </mat-error>
+      </mat-form-field>
+      <div class="form__discount-actions">
+        <button
+          type="button"
+          mat-stroked-button
+          (click)="onChange(discount, 50)"
+          color="primary"
+        >
+          +50
+        </button>
+        <button
+          type="button"
+          mat-stroked-button
+          (click)="onChange(discount, 200)"
+          color="primary"
+        >
+          +200
+        </button>
+        <button
+          type="button"
+          mat-stroked-button
+          (click)="onChange(discount, 500)"
+          color="primary"
+        >
+          +500
+        </button>
+      </div>
+    </mat-card>
+    <!--  -->
+    <!-- Accordion -->
+    <mat-accordion
+      formArrayName="productList"
+      [hideToggle]="true"
+      [multi]="true"
+    >
+      <mat-expansion-panel
+        (afterExpand)="test(accordion)"
+        #accordion
+        *ngFor="let product of arrayProductControl.controls; index as i"
+        [formGroupName]="i"
+      >
+        <!-- Product List Header -->
+        <mat-expansion-panel-header collapsedHeight="60px">
+          <mat-panel-title *ngIf="!accordion.expanded" [style.fontSize.px]="16">
+            <span class="nowrap-hidden-text">
+              {{ product.get("name").value }}
+            </span>
+          </mat-panel-title>
+          <mat-panel-description>
+            <div
+              class="close-panel-description"
+              *ngIf="!accordion.expanded; else dsc"
+            >
+              <span>{{ product.get("count").value }}шт.</span>
+              <span class="nowrap-hidden-text">
+                {{
+                  product.get("price").value * product.get("count").value
+                    | currency: "RUB":"symbol-narrow"
+                }}
+              </span>
+            </div>
+            <ng-template #dsc>
+              <span> Подробно </span>
+            </ng-template>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <!--  -->
+        <!-- Product List Content  -->
+        <app-form-products
+          [formGroup]="arrayProductControl.controls[i]"
+        ></app-form-products>
+        <!--  -->
+        <!-- Product List Action -->
+        <mat-action-row class="btn-actions">
+          <button type="button" color="primary" mat-button (click)="delete(i)">
+            <mat-icon>delete</mat-icon>
+            <span> Удалить </span>
+          </button>
+        </mat-action-row>
+        <!--  -->
+      </mat-expansion-panel>
+      <!--  -->
+
+      <!-- New Product -->
+      <mat-expansion-panel #expansionheadr (afterExpand)="test(expansionheadr)">
+        <!-- New Product List Header -->
+        <mat-expansion-panel-header collapsedHeight="65px">
+          <mat-panel-description>
+            <span>+ Добавить продукт</span>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <!--  -->
+        <!-- New Product List Content  -->
+        <app-form-products [formGroup]="formNewProduct"></app-form-products>
+        <!--  -->
+        <!-- New Product List Action -->
+        <mat-action-row class="btn-actions">
+          <button
+            mat-button
+            color="accent"
+            [disabled]="formNewProduct.invalid"
+            (click)="add()"
+          >
+            <mat-icon>playlist_add</mat-icon>
+            <span> Добавить </span>
+          </button>
+        </mat-action-row>
+      </mat-expansion-panel>
+      <!-- -->
+    </mat-accordion>
+    <!--  -->
+  </form>
+</section>
+
+<ng-template #loading>
+  <p class="container-page">
+    Loading...
+  </p>
+</ng-template>

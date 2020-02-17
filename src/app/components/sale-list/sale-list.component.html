@@ -1,0 +1,35 @@
+<section>
+
+    <div (click)="picker.open()" matRipple class="date text-primary">
+        <input [formControl]='date' [matDatepicker]="picker" autocomplete="off">
+        <mat-datepicker #picker [startAt]="date.value | date" (closed)="closedPicker()"></mat-datepicker>
+        <h1> {{date.value | date:"EE, d MMM yyyy"}}</h1>
+        <p class="date-description" [class.text-accent]="isSameDate">{{descriptionDate}}</p>
+    </div>
+
+    <mat-action-list [@salesListAnim]="anim? true : false">
+        <mat-list-item (click)="onSelect(s.id, i + 1)" *ngFor=" let s of (sales$ | async); let i=index">
+            <div class="sale text-primary">
+                <div class="sale__item"> {{i + 1}} </div>
+                <div class="sale__item"> {{s.count}} поз. </div>
+                <div class="sale__item"> {{s.total | currency:'RUB':'symbol-narrow'}} </div>
+            </div>
+            <button disableRipple="true" (click)="$event.stopPropagation()" class="icon-more-vert" mat-icon-button
+                [matMenuTriggerFor]="menu">
+                <mat-icon class="text-primary">more_vert</mat-icon>
+            </button>
+        </mat-list-item>
+    </mat-action-list>
+
+    <mat-menu [xPosition]="'before'" #menu="matMenu">
+        <button (click)="onDelete(s)" mat-menu-item> Удалить </button>
+    </mat-menu>
+
+    <button class="btn-fly" (click)="addSale()" mat-fab>
+        <mat-icon>add</mat-icon>
+    </button>
+
+    <div *ngIf="!(sales$ | async)?.length" class="emty-sale">
+        <h1> Сегодня небыло продаж</h1>
+    </div>
+</section>

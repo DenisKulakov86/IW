@@ -1,0 +1,115 @@
+<div class="form-product" [formGroup]="formGroup" [style.fontSize.px]="16">
+  <!-- Name -->
+  <mat-form-field class="form-product__name">
+    <input
+      #nameInput="matInput"
+      (keypress)="handleInput($event)"
+      formControlName="name"
+      type="text"
+      autocomplete="off"
+      matInput
+      placeholder="Название"
+      required
+      [errorStateMatcher]="matcher"
+    />
+    <mat-error> {{ nameError() }} </mat-error>
+    <button type="button" mat-icon-button matSuffix (click)="clear(name)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+  <!--  -->
+
+  <!-- start Count  -->
+  <ng-container *ngIf="!nameInput.focused; else search">
+    <mat-form-field class="form-product__count">
+      <input
+        formControlName="count"
+        type="number"
+        autocomplete="off"
+        matInput
+        placeholder="Количество"
+        required
+        [errorStateMatcher]="matcher"
+      />
+      <mat-error> {{ contError() }} </mat-error>
+    </mat-form-field>
+    <div class="form-product__count-actions">
+      <button
+        type="button"
+        mat-stroked-button
+        color="primary"
+        (click)="onChange(count, -1)"
+        color="primary"
+      >
+        <mat-icon>remove</mat-icon>
+      </button>
+      <button
+        type="button"
+        mat-stroked-button
+        color="primary"
+        (click)="onChange(count, 1)"
+        color="primary"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+    <!-- end Count -->
+
+    <!-- start Price -->
+    <mat-form-field class="form-product__price">
+      <input
+        formControlName="price"
+        type="number"
+        min="0"
+        autocomplete="off"
+        matInput
+        placeholder="Цена"
+        required
+        [errorStateMatcher]="matcher"
+      />
+      <mat-error> {{ priceError() }} </mat-error>
+      <button type="button" mat-icon-button matSuffix (click)="clear(price)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+    <div class="form-product__price-actions">
+      <button
+        type="button"
+        mat-stroked-button
+        (click)="onChange(price, 50)"
+        color="primary"
+      >
+        +50
+      </button>
+      <button
+        type="button"
+        mat-stroked-button
+        (click)="onChange(price, 200)"
+        color="primary"
+      >
+        +200
+      </button>
+      <button
+        type="button"
+        mat-stroked-button
+        (click)="onChange(price, 500)"
+        color="primary"
+      >
+        +500
+      </button>
+    </div>
+  </ng-container>
+  <!-- end Price -->
+
+  <ng-template #search>
+    <mat-action-list class="search">
+      <mat-list-item
+        *ngFor="let name of nameInput.value | search | async"
+        (mousedown)="setName(name)"
+      >
+        {{ name }}
+      </mat-list-item>
+    </mat-action-list>
+    <!-- <app-search-product></app-search-product> -->
+  </ng-template>
+</div>

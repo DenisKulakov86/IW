@@ -1,0 +1,35 @@
+<h2>Выбранный файл</h2>
+
+<mat-card>
+    <ng-container *ngIf="(baseInfo$ | async) as baseInfo">
+        <mat-card-title>
+            <img src="{{baseInfo.iconLink}}" alt="iconfile">
+            <span> {{baseInfo.name}}</span>
+        </mat-card-title>
+        <mat-card-content>
+            <ul>
+                <li>
+                    <span class="mat-body-strong">ID: </span>
+                    <span> {{baseInfo.id}} </span>
+                </li>
+                <li>
+                    <span class="mat-body-strong">Размер: </span>
+                    <span>{{baseInfo.size}}</span> byte </li>
+                <li>
+                    <span class="mat-body-strong">Создан: </span>
+                    <span>{{ baseInfo.createdTime | date:"dd-MM-yy hh:mm "}}</span>
+                </li>
+                <li>
+                    <span class="mat-body-strong">Изменен: </span>
+                    <span>{{ baseInfo.modifiedTime | date:"dd-MM-yy hh:mm "}}</span>
+                </li>
+            </ul>
+        </mat-card-content>
+
+    </ng-container>
+    <mat-card-actions>
+        <button (click)="onChange()" mat-flat-button color="primary"> Изменить </button>
+    </mat-card-actions>
+</mat-card>
+
+<!-- <app-drive-viewer></app-drive-viewer> -->

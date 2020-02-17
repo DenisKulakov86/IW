@@ -1,0 +1,84 @@
+<mat-sidenav-container>
+   <mat-sidenav #drawer [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="(isHandset$ | async) === false"
+      [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'" [autoFocus]='false'>
+      <!-- fixedInViewport  -->
+      <!-- [fixedTopGap]="56" -->
+      <!-- [mode]="'over'" -->
+      <mat-toolbar>Menu</mat-toolbar>
+      <mat-nav-list>
+         <a *ngFor="let link of links" mat-list-item routerLinkActive="active" routerLink='{{link.patch}}'
+            (click)="drawer.mode === 'over'? drawer.close(): ''">{{link.name}}</a>
+      </mat-nav-list>
+   </mat-sidenav>
+
+
+   <mat-sidenav-content #content>
+      <mat-toolbar class="mat-elevation-z6" color="primary">
+         <button type="button" aria-label="Toggle sidenav" mat-icon-button *ngIf="isHandset$ | async"
+            (click)="drawer.toggle()">
+            <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+         </button>
+         <span class="title">iw</span>
+         <button class="more-vert" mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+         </button>
+      </mat-toolbar>
+      <!-- Add Content Here -->
+      <!-- {{drawer.mode}} -->
+      <mat-toolbar>
+         <span>{{title}}</span>
+      </mat-toolbar>
+      <ng-container *ngIf="!(loading$ | async) else loading">
+         <ng-container *ngIf="!(error$ | async) else retry">
+            <div class="mat-typography container-page" [@routeAnimations]="prepareRoute(outlet)">
+               <router-outlet #outlet="outlet"></router-outlet>
+            </div>
+         </ng-container>
+      </ng-container>
+      <ng-template #loading>
+         <p>
+            Loading...
+         </p>
+      </ng-template>
+      <ng-template #retry>
+         <div class="center-page">
+            <h1 class="text-accent">Ошибка загрузки данный</h1>
+            <button type="button" mat-button (click)="getSales()">
+               Повторить
+            </button>
+         </div>
+      </ng-template>
+      <!--  -->
+
+      <!-- <button class="btn-fly" disabled  (click)="add()" mat-fab>
+         <mat-icon>add</mat-icon>
+      </button>
+      <button class="btn-fly btn-delete " disabled (click)="delete()" mat-fab>
+         <mat-icon>delete</mat-icon>
+      </button>
+      <button class="btn-fly btn-edit" (click)="edit()" mat-fab>
+         <mat-icon>edit</mat-icon>
+      </button>
+      <button class="btn-fly btn-updata"  (click)="update()" mat-fab>
+         <mat-icon>update</mat-icon>
+      </button>
+      <button class="btn-fly btn-get" (click)="get()" mat-fab>
+         <mat-icon>get_app</mat-icon>
+      </button> -->
+   </mat-sidenav-content>
+</mat-sidenav-container>
+
+
+<mat-menu [xPosition]="'before'" #menu="matMenu">
+   <!-- start Authorization -->
+   <button (click)="signIn()" *ngIf='!(isSignedIn$ | async)' mat-menu-item> Войти </button>
+   <button (click)="signOut()" *ngIf='isSignedIn$ | async' mat-menu-item> Выйти </button>
+   <!-- end  Authorization -->
+   <!--start THEME -->
+   <mat-checkbox [formControl]="isDarkOrLight" class="mat-menu-item">
+      Темная тема
+   </mat-checkbox>
+   <button (click)="setIndigoTheme()" mat-menu-item> Indigo </button>
+   <button (click)="setGreenTheme()" mat-menu-item> Green </button>
+   <!--end THEME -->
+</mat-menu>

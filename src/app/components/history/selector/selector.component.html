@@ -1,0 +1,48 @@
+<div class="mat-title text-primary">{{ title$ | async }}</div>
+<mat-action-list>
+  <ng-container *ngIf="showSelector$ | async">
+    <mat-list-item (click)="pickerFrom.open()">
+      <input
+        [max]="dateTo.value"
+        class="hidden"
+        [formControl]="dateFrom"
+        [matDatepicker]="pickerFrom"
+        autocomplete="off"
+        [appConnectControl]="start$ | async"
+      />
+      <mat-datepicker #pickerFrom touchUi  [startAt]="dateFrom.value"></mat-datepicker>
+      <span>{{ dateFrom.value | date: "EE, d MMM yyyy" }}</span>
+    </mat-list-item>
+    <mat-list-item (click)="pickerTo.open()">
+      <input
+        [min]="dateFrom.value"
+        class="hidden"
+        [formControl]="dateTo"
+        [matDatepicker]="pickerTo"
+        autocomplete="off"
+        [appConnectControl]="end$ | async"
+      />
+      <mat-datepicker #pickerTo touchUi  [startAt]="dateTo.value"></mat-datepicker>
+      <span>{{ dateTo.value | date: "EE, d MMM yyyy" }}</span>
+    </mat-list-item>
+  </ng-container>
+  <mat-list-item (click)="openDialodView()">
+    <mat-icon matListIcon>view_day</mat-icon>
+    <span>{{ view$ | async }}</span>
+  </mat-list-item>
+  <mat-list-item (click)="toggleReverse()">
+    <mat-icon *ngIf="reverse$ | async" matListIcon>arrow_downward</mat-icon>
+    <mat-icon *ngIf="!(reverse$ | async)" matListIcon>arrow_upward</mat-icon>
+    <span>Дата</span>
+  </mat-list-item>
+</mat-action-list>
+
+<div *ngFor="let d of dates">
+  <div class="mat-title">
+    {{ d | date }}
+  </div>
+</div>
+
+<button class="btn-fly" (click)="openDialodPeriod()" mat-fab>
+  <mat-icon>update</mat-icon>
+</button>
