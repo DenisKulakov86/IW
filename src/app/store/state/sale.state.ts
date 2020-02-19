@@ -191,8 +191,7 @@ export class SaleState implements NgxsOnInit {
 
         return state.select;
     }
-
-
+     
     static getSaleByDate(dateFrom: moment.Moment, dateTo: moment.Moment = dateFrom) {
         return createSelector(
             [SaleState],
