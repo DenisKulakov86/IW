@@ -31,8 +31,8 @@ import {
   ofActionErrored,
   ofActionCompleted
 } from "@ngxs/store";
-import { AuthState, User } from "src/app/store/state/auth.state";
-import { SignIn, SignOut } from "src/app/store/actions/auth.actions";
+import { AuthState } from "src/app/store/state/auth.state";
+import {  SignOut } from "src/app/store/actions/auth.actions";
 import { SaleState } from "src/app/store/state/sale.state";
 import { Sale } from "src/app/models/sale.model";
 import {
@@ -49,8 +49,8 @@ import { THEME, ConfigState } from "src/app/store/state/config.state";
 import { FormControl } from "@angular/forms";
 import { slideInAnimation } from "../animation";
 import { MatSidenavContent } from "@angular/material/sidenav";
-import { AuthenticationService } from "src/app/service/auth.service";
 import { FireDataBaseService } from "src/app/service/firedatabase";
+import { User } from 'src/app/models/user.model';
 
 @Component({
   selector: "app-navigation",
@@ -84,7 +84,6 @@ export class NavigationComponent implements OnInit, OnDestroy {
     private store: Store,
     private router: Router,
     private titleServise: Title,
-    public auth: AuthenticationService,
   ) {
   }
   setTitle(url: string) {

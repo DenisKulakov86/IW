@@ -27,7 +27,8 @@ import {
   mergeMap,
   catchError,
   take,
-  retry
+  retry,
+  delay
 } from "rxjs/operators";
 import { AuthState } from "./auth.state";
 import {
@@ -53,6 +54,7 @@ import {
   AngularFireList,
   SnapshotAction
 } from "@angular/fire/database";
+import { AngularFireAuth } from '@angular/fire/auth';
 
 function saveSales(ctx: StateContext<SaleStateModel>) {
   let sales = ctx.getState().sales;
@@ -60,7 +62,6 @@ function saveSales(ctx: StateContext<SaleStateModel>) {
 }
 
 function insertOrUpdateSale(id: any, loadedSale?: Sale) {
-  console.log(loadedSale);
   return iif<Sale[]>(
     sales => sales.some(s => s.id == id),
     updateItem(sale => sale.id == id, patch(loadedSale)),
@@ -72,51 +73,71 @@ export interface SaleStateModel {
   sales: Sale[];
   error: any;
   select: Sale;
-  baseInfo: File;
   loading: boolean;
 }
 
 @State<SaleStateModel>({
-  name: "SaleStore",
+  name: "sales",
   defaults: {
     sales: [],
     error: null,
     loading: false,
     select: null,
-    baseInfo: null
   }
 })
 export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
-  salesRef$: Observable<AngularFireList<Sale>>;
-  sales$: Observable<SnapshotAction<Sale>[]>;
+  // salesRef$: Observable<AngularFireList<Sale>>;
+  // sales$: Observable<SnapshotAction<Sale>[]>;
+  saleRef: AngularFireList<Sale>
   constructor(
+    private db: AngularFireDatabase,
     private store: Store,
-    private salesService: SalesService,
-    private db: FireDataBaseService // private db: AngularFireDatabase
-  ) {}
-  ngxsOnInit(ctx: StateContext<SaleStateModel>) {}
+  ) { }
+  ngxsOnInit(ctx: StateContext<SaleStateModel>) {
+    console.log("ngxsOnInit");
+    let salesRef$ = this.store.select(AuthState.user)
+      .pipe(map(user => user ? this.db.list<Sale>(`${user.uid}/sale`) : null));
+
+    salesRef$.subscribe(ref => this.saleRef = ref)
+
+    salesRef$.pipe(
+      switchMap((ref) => ref ? ref.snapshotChanges() : empty()),
+      map(change => change.map((c): Sale => ({ ...c.payload.val(), id: c.key, }))),
+    )
+      .subscribe(sales => {
+        ctx.dispatch(new SetSales(sales))
+      });
+
+
+
+    // this.store.select(SaleState.loading).subscribe(console.log)
+
+  }
+
   ngxsAfterBootstrap(ctx: StateContext<SaleStateModel>) {
-    this.db.sales$.subscribe(sales => ctx.dispatch(new SetSales(sales)));
+    console.log("ngxsAfterBootstrap");
   }
 
   @Action(SetSales)
   setSales(ctx: StateContext<SaleStateModel>, { sales }: SetSales) {
-    ctx.patchState({ sales });
+    ctx.patchState({ sales, loading: false });
   }
 
   @Action(GetSales)
   getSales(ctx: StateContext<SaleStateModel>) {
-    this.db.getSales();
+    //this.db.getSales();
   }
 
 
   @Action(DeleteSale)
   deleteSale(ctx: StateContext<SaleStateModel>, { id }: DeleteSale) {
-    ctx.setState(
-      patch({
-        sales: removeItem<Sale>(s => s.id === id)
-      })
-    );
+
+    this.saleRef.remove(id);
+    // ctx.setState(
+    //   patch({
+    //     sales: removeItem<Sale>(s => s.id === id)
+    //   })
+    // );
     // saveSales(ctx);
     //do api
   }
@@ -155,8 +176,8 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
   saveSale(ctx: StateContext<SaleStateModel>) {
     let select = ctx.getState().select;
     if (!select.productList.length) {
-      if (!select.id) return;
-      else this.store.dispatch(new DeleteSale(select.id));
+      // if (!select.id) return;
+      // else this.store.dispatch(new DeleteSale(select.id));
     } else {
       if (!select.id) {
         let id = Math.max(...ctx.getState().sales.map(s => s.id), 0) + 1;
@@ -177,10 +198,10 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
   @Action(AddSale)
   addSale(ctx: StateContext<SaleStateModel>) {
     let sale = ctx.getState().select;
-    return this.db.addSale({
-      ...sale
-      // timestamp: moment().valueOf()
-    });
+    // return this.db.addSale({
+    //   ...sale
+    //   // timestamp: moment().valueOf()
+    // });
     // return from(this.db.addSale(sale)).pipe(
     //   tap(res => console.log("Add Sale", res))
     // );
@@ -193,10 +214,7 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
   static error(state: SaleStateModel) {
     return state.error;
   }
-  @Selector()
-  static baseInfo(state: SaleStateModel) {
-    return state.baseInfo;
-  }
+
   @Selector()
   static sales(state: SaleStateModel) {
     return state.sales;
@@ -213,8 +231,8 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
     return createSelector([SaleState], (state: SaleStateModel) => {
       return state.sales
         ? state.sales.filter(s =>
-            moment(s.timestamp).isBetween(dateFrom, dateTo, "day", "[]")
-          )
+          moment(s.timestamp).isBetween(dateFrom, dateTo, "day", "[]")
+        )
         : [];
     });
   }

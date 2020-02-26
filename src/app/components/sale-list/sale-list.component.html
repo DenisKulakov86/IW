@@ -8,7 +8,8 @@
     </div>
 
     <mat-action-list [@salesListAnim]="anim? true : false">
-        <mat-list-item (click)="onSelect(s.id, i + 1)" *ngFor=" let s of (sales$ | async); let i=index">
+        <mat-list-item (click)="onSelect(s.id, i + 1)" *ngFor=" let s of (sales$ | async); let i = index">
+            {{s | json}}
             <div class="sale text-primary">
                 <div class="sale__item"> {{i + 1}} </div>
                 <div class="sale__item"> {{s.count}} поз. </div>
@@ -18,12 +19,13 @@
                 [matMenuTriggerFor]="menu">
                 <mat-icon class="text-primary">more_vert</mat-icon>
             </button>
+            <mat-menu [xPosition]="'before'" #menu="matMenu">
+                <button (click)="onDelete(s)" mat-menu-item> Удалить </button>
+            </mat-menu>
         </mat-list-item>
     </mat-action-list>
 
-    <mat-menu [xPosition]="'before'" #menu="matMenu">
-        <button (click)="onDelete(s)" mat-menu-item> Удалить </button>
-    </mat-menu>
+    
 
     <button class="btn-fly" (click)="addSale()" mat-fab>
         <mat-icon>add</mat-icon>

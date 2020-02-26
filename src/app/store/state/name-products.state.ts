@@ -25,11 +25,11 @@ export class NameProductsSate implements NgxsOnInit {
         // ctx.patchState(JSON.parse(sales, (key, val) => {
         //     return key == "date" ? new Date(val) : val;
         // }))
-        this.store.select(AuthState.isSignedIn)
-            .pipe(filter(isSignIn => isSignIn === true))
-            .subscribe(() => {
-                ctx.dispatch(new GetNameProducts());
-            })
+        // this.store.select(AuthState.isSignedIn)
+        //     .pipe(filter(isSignIn => isSignIn === true))
+        //     .subscribe(() => {
+        //         ctx.dispatch(new GetNameProducts());
+        //     })
     }
 
     @Action(GetNameProducts)

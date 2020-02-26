@@ -76,7 +76,7 @@ export class SaleListComponent implements OnInit, AfterViewInit {
           : "Сегодня";
         sessionStorage.setItem("sessionDate", d);
       }),
-      switchMap(d => this.store.selectOnce(SaleState.getSaleByDate(moment(d)))),
+      switchMap(d => this.store.select(SaleState.getSaleByDate(moment(d)))),
       map((sales: Sale[]): SaleList[] => {
         return sales.map(
           (s): SaleList => ({
@@ -115,6 +115,8 @@ export class SaleListComponent implements OnInit, AfterViewInit {
     );
   }
   onDelete(s: Sale) {
+    console.log(s);
+    
     this.store.dispatch(new DeleteSale(s.id));
   }
 

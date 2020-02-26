@@ -17,7 +17,7 @@ interface ConfigStateModel {
 @State<ConfigStateModel>({
     name: "config",
     defaults: {
-        darkOrLight: "",
+        darkOrLight: THEME.light,
         theme: THEME.indigo
     }
 })
@@ -28,7 +28,7 @@ export class ConfigState {
         patchState({ darkOrLight: getState().darkOrLight === THEME.dark ? THEME.light : THEME.dark })
     }
     @Action(SetTheme)
-    setIndigoTheme({ patchState }: StateContext<ConfigStateModel>, { theme }: SetTheme) {
+    setTheme({ patchState }: StateContext<ConfigStateModel>, { theme }: SetTheme) {
         patchState({ theme })
     }
 

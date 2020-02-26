@@ -12,29 +12,25 @@ import { AngularFireAuth } from "@angular/fire/auth";
 import { SignIn, SignOut, SetUser } from "../actions/auth.actions";
 import { from } from "rxjs";
 import * as firebase from "firebase/app";
-import { AuthenticationService } from "src/app/service/auth.service";
 import { Router } from "@angular/router";
-import { NgZone } from "@angular/core";
 import { tap } from "rxjs/operators";
-export interface User {
-  uid: string;
-  email: string;
-  photoURL?: string;
-  displayName?: string;
-  somethingCustom?: string;
-}
-@State<User>({
-  name: "Auth",
-  defaults: null
+import { User, UserSateModel } from 'src/app/models/user.model';
+
+@State<UserSateModel>({
+  name: "user",
+  defaults: {
+    user: null,
+  }
 })
 export class AuthState implements NgxsAfterBootstrap {
   constructor(
-    private auth: AuthenticationService,
     private router: Router,
-    private actions: Actions
-  ) {}
-  ngxsAfterBootstrap(ctx: StateContext<User>) {}
-  ngxsOnInit(ctx: StateContext<User>) {
+    private actions: Actions,
+    private afAuth: AngularFireAuth
+  ) { }
+  ngxsAfterBootstrap(ctx: StateContext<UserSateModel>) { }
+  ngxsOnInit(ctx: StateContext<UserSateModel>) {
+    // this.afAuth.authState.subscribe(state => ctx.dispatch(new SetUser(this.getUserFromState(state))));
     this.actions
       .pipe(ofActionDispatched(SignOut))
       .subscribe(() => this.router.navigate(["/login"]));
@@ -44,32 +40,39 @@ export class AuthState implements NgxsAfterBootstrap {
   }
 
   @Selector()
-  static user(state: User) {
-    console.log("Selector user", state);
-
-    return state;
+  static user(state: UserSateModel) {
+    return state.user;
   }
 
   @Selector()
-  static isSignedIn(state: User) {
-    return !!state;
+  static isSignedIn(state: UserSateModel) {
+    return !!state.user;
   }
-
+  @Action(SetUser)
+  setUser({ patchState, setState }: StateContext<UserSateModel>, { user }: SetUser) {
+  }
 
   @Action(SignIn)
-  signIn(ctx: StateContext<User>) {
-    return from(this.auth.googleSignin()).pipe(
-      tap(
-        ({
-          user: { uid, email, photoURL, displayName }
-        }: firebase.auth.UserCredential) => {
-          ctx.setState({ uid, email, photoURL, displayName });
-        }
-      )
-    );
+  signIn({ patchState }: StateContext<UserSateModel>) {
+    return from(this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()))
+      .pipe(tap(({ user }) => patchState({ user: this.getUserFromState(user) })))
   }
   @Action(SignOut)
-  signOut(ctx: StateContext<User>) {
-    return from(this.auth.signOut()).pipe(tap(() => ctx.setState(null)));
+  signOut({ patchState, setState }: StateContext<UserSateModel>) {
+    return from(this.afAuth.auth.signOut())
+      .pipe(tap(() => patchState({ user: null })))
+  }
+  getUserFromState(user: firebase.User): User | null {
+    if (user)
+      return {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        somethingCustom: null
+      }
+    else
+      return null;
+
   }
 }

@@ -43,6 +43,8 @@ import { AngularFireAuthModule } from "@angular/fire/auth";
 // import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireDatabaseModule } from "@angular/fire/database";
 import { AuthState } from "./store/state/auth.state";
+import { resolve } from 'url';
+import { timer } from 'rxjs';
 
 //
 
@@ -50,7 +52,11 @@ import { AuthState } from "./store/state/auth.state";
 registerLocaleData(localeRu, "ru");
 
 export function noop() {
-  return function() {};
+  // return () => new Promise((resolve) => setTimeout(() => {
+  //   console.log("APP_INITIALIZER");
+  //   return resolve(true);
+  // }, 1000))
+  return ()=> {}
 }
 
 @NgModule({
@@ -87,7 +93,13 @@ export function noop() {
     AngularFireDatabaseModule,
     //
     NgxsModule.forRoot(
-      [AuthState, NameProductsSate, SaleState, ConfigState, HistorySatate],
+      [
+        AuthState,
+        NameProductsSate,
+        SaleState,
+        ConfigState,
+        HistorySatate
+      ],
       {
         developmentMode: !environment.production,
         selectorOptions: {
@@ -99,8 +111,8 @@ export function noop() {
     // NgxsLoggerPluginModule.forRoot(),
     NgxsStoragePluginModule.forRoot({
       key: [
-        ConfigState, 
-        HistorySatate, 
+        ConfigState,
+        // HistorySatate, 
         AuthState
       ]
       // storage: StorageOption.SessionStorage
@@ -108,7 +120,13 @@ export function noop() {
     !environment.production ? NgxsReduxDevtoolsPluginModule.forRoot() : [],
     // !environment.production ? NgxsLoggerPluginModule.forRoot() : []
   ],
-  providers: [{ provide: LOCALE_ID, useValue: "ru" }],
+  providers: [
+    { provide: LOCALE_ID, useValue: "ru" },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: noop,
+      multi: true
+    }],
   bootstrap: [AppComponent]
 })
 export class AppModule {

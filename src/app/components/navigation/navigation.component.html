@@ -1,43 +1,30 @@
 <mat-sidenav-container>
-  <mat-sidenav
-    #drawer
-    [mode]="(isHandset$ | async) ? 'over' : 'side'"
-    [opened]="(isHandset$ | async) === false"
-    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-    [autoFocus]="false"
-  >
+  <mat-sidenav #drawer [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="(isHandset$ | async) === false"
+    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'" [autoFocus]="false">
     <!-- fixedInViewport  -->
     <!-- [fixedTopGap]="56" -->
     <!-- [mode]="'over'" -->
     <mat-toolbar>
-      <!-- <ng-container *ngIf="user$ | async as user" >
-        <ul >
-          <li>{{user?.displayName}}</li>
-          <li class="mat-body">{{user?.email}}</li>
-        </ul>
-      </ng-container> -->
+      <ng-container *ngIf="user$ | async; let user">
+        <mat-toolbar-row class="user">
+          <img class="user__pic" src="{{user.photoURL}}" alt="user-pic">
+          <div class="user__wrap">
+            <span>{{user.displayName}}</span>
+            <span class="mat-body">{{user.email}}</span>
+          </div>
+        </mat-toolbar-row>
+      </ng-container>
     </mat-toolbar>
     <mat-nav-list>
-      <a
-        *ngFor="let link of links"
-        mat-list-item
-        routerLinkActive="active"
-        routerLink="{{ link.patch }}"
-        (click)="drawer.mode === 'over' ? drawer.close() : ''"
-        >{{ link.name }}</a
-      >
+      <a *ngFor="let link of links" mat-list-item routerLinkActive="active" routerLink="{{ link.patch }}"
+        (click)="drawer.mode === 'over' ? drawer.close() : ''">{{ link.name }}</a>
     </mat-nav-list>
   </mat-sidenav>
 
-  <mat-sidenav-content >
+  <mat-sidenav-content>
     <mat-toolbar class="mat-elevation-z6" color="primary">
-      <button
-        type="button"
-        aria-label="Toggle sidenav"
-        mat-icon-button
-        *ngIf="isHandset$ | async"
-        (click)="drawer.toggle()"
-      >
+      <button type="button" aria-label="Toggle sidenav" mat-icon-button *ngIf="isHandset$ | async"
+        (click)="drawer.toggle()">
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
       <span class="title">iw</span>
@@ -49,23 +36,16 @@
       </button>
     </mat-toolbar>
     <!-- Add Content Here -->
-
-    <button mat-raised-button (click)="getSales()">Get Sales</button>
-    <button mat-raised-button (click)="removeBooks()">Remove Books</button>
-    <button mat-raised-button (click)="createSales()">Create Sales</button>
     <mat-toolbar>
       <span>{{ title }}</span>
     </mat-toolbar>
-    <!-- <ng-container *ngIf="!(loading$ | async); else loading"> -->
+    <ng-container *ngIf="!(loading$ | async); else loading">
       <ng-container *ngIf="!(error$ | async); else retry">
-        <div
-          class="mat-typography container-page"
-          [@routeAnimations]="prepareRoute(outlet)"
-        >
+        <div class="mat-typography container-page" [@routeAnimations]="prepareRoute(outlet)">
           <router-outlet #outlet="outlet"></router-outlet>
         </div>
       </ng-container>
-    <!-- </ng-container> -->
+    </ng-container>
     <ng-template #loading>
       <p>
         Loading...

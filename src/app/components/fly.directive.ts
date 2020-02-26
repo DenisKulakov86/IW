@@ -26,9 +26,6 @@ export class FlyDirective implements OnInit, OnDestroy {
     this.sub = this.breakpointObserver.observe(Breakpoints.Handset)
       .pipe(map(result => result.matches))
       .subscribe(v => this.nativEl.style.left = v ? "0" : `${this.offset}px`)
-    // fromEvent(window, "resize").subscribe(v => {
-    //   // console.log(document.documentElement.clientWidth);
-    // })
   }
 
   ngOnDestroy() {

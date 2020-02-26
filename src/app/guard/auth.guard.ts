@@ -8,7 +8,6 @@ import {
   Router
 } from "@angular/router";
 import { tap, map } from "rxjs/operators";
-import { AuthenticationService } from "../service/auth.service";
 import { Store } from "@ngxs/store";
 import { AuthState } from "../store/state/auth.state";
 

@@ -9,7 +9,6 @@ import { Observable, of, Subject, combineLatest } from "rxjs";
 import { Sale } from "../models/sale.model";
 import { Store, Select } from "@ngxs/store";
 import { AuthState } from "../store/state/auth.state";
-import { AuthenticationService } from "./auth.service";
 import {
   take,
   filter,
