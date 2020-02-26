@@ -4,7 +4,7 @@ import { NgModule, LOCALE_ID, APP_INITIALIZER } from "@angular/core";
 import { NgxsModule, Store } from "@ngxs/store";
 import { NgxsLoggerPluginModule } from "@ngxs/logger-plugin";
 import { NgxsReduxDevtoolsPluginModule } from "@ngxs/devtools-plugin";
-import { NgxsStoragePluginModule } from "@ngxs/storage-plugin";
+import { NgxsStoragePluginModule, StorageOption } from "@ngxs/storage-plugin";
 
 import { registerLocaleData } from "@angular/common";
 import localeRu from "@angular/common/locales/ru";
@@ -18,19 +18,11 @@ import { MaterialModule } from "./material/material.module";
 import { NotFoundComponent } from "./components/not-found/not-found.component";
 import { HistoryComponent } from "./components/history/history.component";
 import { SaleListComponent } from "./components/sale-list/sale-list.component";
-import { DriveViewerComponent } from "./components/drive-viewer/drive-viewer.component";
-import { ConnectFormControlDirective } from "./components/drive-viewer/connect-form.directive";
 import { OverlayContainer } from "@angular/cdk/overlay";
 import { ThemeService } from "./service/theme.service";
-import { ModalDialogComponent } from "./components/drive-viewer/modal-diolog/modal-diolog.component";
 import { ConnectFormGroupDirective } from "./components/sale-list/sale-detail/connect-form-group.directive";
-import { SettingComponent } from "./components/setting/setting.component";
-import { FileListComponent } from "./components/setting/file-list/file-list.component";
-import { FileState } from "./store/state/file.state";
 import { LoginComponent } from "./components/login/login.component";
 import { SaleState } from "./store/state/sale.state";
-import { AuthState } from "./store/state/auth.state";
-import { GapiService } from "./service/google-gapi/gapi.service";
 import { environment } from "src/environments/environment";
 import { SaleDetailComponent } from "./components/sale-list/sale-detail/sale-detail.component";
 import { HttpClientModule } from "@angular/common/http";
@@ -38,20 +30,25 @@ import { SearchPipe } from "./components/sale-list/form-products/search.pipe";
 import { FormProductsComponent } from "./components/sale-list/form-products/form-products.component";
 import { NameProductsSate } from "./store/state/name-products.state";
 import { ConfigState } from "./store/state/config.state";
-import { pairwise } from "rxjs/operators";
 import { HistoryModalDialogComponent } from "./components/history/history-modal-dialog/history-modal-dialog.component";
 import { TableHistoryComponent } from "./components/history/table-history/table-history.component";
 import { SelectorComponent } from "./components/history/selector/selector.component";
 import { FlyDirective } from "./components/fly.directive";
 import { HistorySatate } from "./store/state/history.state";
-import { ConnectControlDirective } from './components/history/selector/connect-form-control.directive';
+import { ConnectControlDirective } from "./components/history/selector/connect-form-control.directive";
+
+/* Firebase services */
+import { AngularFireModule } from "@angular/fire";
+import { AngularFireAuthModule } from "@angular/fire/auth";
+// import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { AngularFireDatabaseModule } from "@angular/fire/database";
+import { AuthState } from "./store/state/auth.state";
+
+//
 
 // the second parameter 'ru' is optional
 registerLocaleData(localeRu, "ru");
 
-export function initGapi(gapiService: GapiService) {
-  return environment.gooleDrive ? () => gapiService.initGapi() : () => {};
-}
 export function noop() {
   return function() {};
 }
@@ -63,13 +60,8 @@ export function noop() {
     SaleListComponent,
     NotFoundComponent,
     HistoryComponent,
-    DriveViewerComponent,
-    ModalDialogComponent,
-    ConnectFormControlDirective,
     ConnectFormGroupDirective,
     ConnectControlDirective,
-    SettingComponent,
-    FileListComponent,
     LoginComponent,
     SaleDetailComponent,
     SearchPipe,
@@ -79,7 +71,7 @@ export function noop() {
     SelectorComponent,
     FlyDirective
   ],
-  entryComponents: [ModalDialogComponent, HistoryModalDialogComponent],
+  entryComponents: [HistoryModalDialogComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -88,16 +80,14 @@ export function noop() {
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
-    // NgxsModule.forRoot(states, { developmentMode: !environment.production }),
+    //firebase
+    AngularFireModule.initializeApp(environment.firebaseConfig),
+    // AngularFirestoreModule,
+    AngularFireAuthModule,
+    AngularFireDatabaseModule,
+    //
     NgxsModule.forRoot(
-      [
-        FileState,
-        NameProductsSate,
-        SaleState,
-        AuthState,
-        ConfigState,
-        HistorySatate
-      ],
+      [AuthState, NameProductsSate, SaleState, ConfigState, HistorySatate],
       {
         developmentMode: !environment.production,
         selectorOptions: {
@@ -108,19 +98,17 @@ export function noop() {
     ),
     // NgxsLoggerPluginModule.forRoot(),
     NgxsStoragePluginModule.forRoot({
-      key: [ConfigState, HistorySatate]
+      key: [
+        ConfigState, 
+        HistorySatate, 
+        AuthState
+      ]
+      // storage: StorageOption.SessionStorage
     }),
-    !environment.production ? NgxsReduxDevtoolsPluginModule.forRoot() : []
+    !environment.production ? NgxsReduxDevtoolsPluginModule.forRoot() : [],
+    // !environment.production ? NgxsLoggerPluginModule.forRoot() : []
   ],
-  providers: [
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initGapi,
-      deps: [GapiService],
-      multi: true
-    },
-    { provide: LOCALE_ID, useValue: "ru" }
-  ],
+  providers: [{ provide: LOCALE_ID, useValue: "ru" }],
   bootstrap: [AppComponent]
 })
 export class AppModule {

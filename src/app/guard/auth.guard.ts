@@ -1,38 +1,30 @@
-import { Injectable } from '@angular/core';
-import { CanActivate, CanActivateChild, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { Store, Select } from '@ngxs/store';
-import { AuthState } from '../store/state/auth.state';
-import { tap, mapTo } from 'rxjs/operators';
+import { Injectable } from "@angular/core";
+import {
+  CanActivate,
+  CanActivateChild,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+  UrlTree,
+  Router
+} from "@angular/router";
+import { tap, map } from "rxjs/operators";
+import { AuthenticationService } from "../service/auth.service";
+import { Store } from "@ngxs/store";
+import { AuthState } from "../store/state/auth.state";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root"
 })
 export class AuthGuard implements CanActivate, CanActivateChild {
-  constructor(private router: Router, private store: Store) { }
-  @Select(AuthState.isSignedIn) isSignedIn$: Observable<boolean>;
-  canActivate(
-    next: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+  constructor(private store: Store, private router: Router) {}
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     let isSignedIn = this.store.selectSnapshot(AuthState.isSignedIn);
     if (!isSignedIn) {
-      this.router.navigate(['/login']);
+      this.router.navigate(["/login"]);
       return false;
-    } 
-    return true;
+    } else return true;
   }
-  canActivateChild(
-    next: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    console.log("canActivateChild");
-    console.log(state.url);
-    // if (state.url === '/login') {
-    //   return true
-    // }
-    // if (true) {
-    //   this.router.navigate(['/login']);
-    // }
-    return true;
+  canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
+    return this.canActivate(route, state);
   }
-
 }

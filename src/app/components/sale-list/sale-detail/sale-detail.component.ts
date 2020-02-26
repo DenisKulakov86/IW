@@ -55,7 +55,8 @@ import {
   UploadSales,
   NewSale,
   SaveSale,
-  GetSale
+  GetSale,
+  AddSale
 } from "src/app/store/actions/sale.actions";
 import { MatExpansionPanel } from "@angular/material/expansion";
 import { MyErrorStateMatcher } from "../../default.error-matcher";
@@ -105,8 +106,8 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isShodow$ = fromEvent(document.body, "scroll").pipe(
       map((ev: Event) => (ev.target as HTMLElement).scrollTop),
       map(top => (top > 10 ? true : false)),
-      distinctUntilChanged(),
-      tap(console.log)
+      distinctUntilChanged()
+      // tap(console.log)
     );
     // .subscribe(v => console.log(v))
 
@@ -152,7 +153,8 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         )
         .subscribe(value => {
           this.store.dispatch(
-            new ChangeSale(this.discount.value, this.arrayProductControl.value)
+            // new ChangeSale(this.discount.value, this.arrayProductControl.value)
+            new ChangeSale(value)
           );
         })
     );
@@ -184,7 +186,10 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   save() {
-    this.store.dispatch(new SaveSale());
+    this.store
+      .dispatch(new AddSale())
+      //.subscribe(() => this.router.navigate(["sale-list"]));
+    // this.store.dispatch(new SaveSale());
   }
   ngOnDestroy() {
     this.subscription.unsubscribe();
@@ -199,13 +204,18 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     this.arrayProductControl.removeAt(i);
   }
 
-  formValidator(control: FormControl) {
+  formValidator(control: FormGroup) {
+    let value = control.value as Sale;
+    let discount = control.get("discount");
+
     let diff =
-      (control.value as Sale).productList.reduce(
-        (s, p) => (s += p.price * p.count),
-        0
-      ) - (control.value as Sale).discount;
-    if (diff < 0) return { invalidDiscount: true };
+      value.productList.reduce((s, p) => (s += p.price * p.count), 0) -
+      value.discount;
+    if (diff <= 0) {
+      discount.setErrors({ invalidDiscount: true });
+      return { invalidDiscount: true };
+    }
+    if (discount.hasError("invalidDiscount")) discount.setErrors(null);
     return null;
   }
   discountError() {
@@ -218,10 +228,6 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   onChange(control: FormControl, addVal) {
     control.setValue(+control.value + addVal);
     control.markAsDirty();
-
-    this.formSale.hasError("invalidDiscount")
-      ? control.setErrors({ invalidDiscount: true })
-      : control.setErrors(null);
   }
   clearValue(control: FormControl) {
     control.setValue(0);

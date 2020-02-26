@@ -1,14 +1,11 @@
 export class SignIn {
-    static readonly type = "[Auth2] SignIn"
+    static readonly type = "[Auth] SignIn"
+}
+export class SetUser {
+    static readonly type = "[Auth] Set User"
+    constructor(public user: firebase.User | null){}
 }
 
 export class SignOut {
-    static readonly type = "[Auth2] SignOut"
-}
-export class UpdateSigninStatus {
-    static readonly type = '[Auth2] Update Signin Status';
-    constructor(public isSignedIn: boolean) { }
-}
-export class InitSession{
-    static readonly type = '[Auth2] Init Session gapi'
+    static readonly type = "[Auth] SignOut"
 }

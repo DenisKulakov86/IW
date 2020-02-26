@@ -4,8 +4,15 @@
 
 export const environment = {
   production: false,
-  gooleDrive: false,
-
+  firebaseConfig: {
+    apiKey: "AIzaSyDTVaxk_zq4A5lRdAEgS15vz7W05aJJ-vI",
+    authDomain: "iweeks.firebaseapp.com",
+    databaseURL: "https://iweeks.firebaseio.com",
+    projectId: "iweeks",
+    storageBucket: "iweeks.appspot.com",
+    messagingSenderId: "752520476098",
+    appId: "1:752520476098:web:41950f02b4d2bd163f925b"
+  }
 };
 
 // <!-- The core Firebase JS SDK is always required and must be listed first -->

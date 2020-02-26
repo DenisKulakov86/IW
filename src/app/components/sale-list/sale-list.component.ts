@@ -31,7 +31,7 @@ import {
   observeOn
 } from "rxjs/operators";
 import { Router } from "@angular/router";
-import { DeleteSale } from "src/app/store/actions/sale.actions";
+import { DeleteSale, GetSales } from "src/app/store/actions/sale.actions";
 import { FormControl } from "@angular/forms";
 
 interface SaleList {

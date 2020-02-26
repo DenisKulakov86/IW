@@ -30,7 +30,7 @@ export class SalesService {
     getSales() {
         return this.http.get<{ sales: Sale[] }>(`${SalesService.localUrl}`)
             .pipe(
-                // delay(1000),
+                delay(1000),
                 // switchMapTo(throwError('Something wrong!')),
             )
     }

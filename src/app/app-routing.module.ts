@@ -6,8 +6,6 @@ import { NavigationComponent } from './components/navigation/navigation.componen
 import { LoginComponent } from './components/login/login.component';
 import { SaleListComponent } from './components/sale-list/sale-list.component';
 import { SaleDetailComponent } from './components/sale-list/sale-detail/sale-detail.component';
-import { FileListComponent } from './components/setting/file-list/file-list.component';
-import { SettingComponent } from './components/setting/setting.component';
 import { AuthGuard } from './guard/auth.guard';
 import { AppComponent } from './app.component';
 
@@ -23,11 +21,6 @@ const routesSection: Routes = [
       component: HistoryComponent,
       data: { animation: "HistoryAnim" }
    },
-   {
-      path: "setting",
-      component: SettingComponent,
-      data: { animation: "SettingAnim" }
-   },
 ]
 // children: routesSection
 // component:NavigationComponent
@@ -37,11 +30,10 @@ const routes: Routes = [
       component: NavigationComponent,
       children: routesSection,
       canActivate: [AuthGuard],
-      // canActivateChild: [AuthGuard]
+      canActivateChild: [AuthGuard]
    },
    { path: "login", component: LoginComponent },
    { path: "sale-detail/:id", component: SaleDetailComponent, canActivate: [AuthGuard] },
-   { path: "file-list", component: FileListComponent, canActivate: [AuthGuard] },
    { path: "**", component: NotFoundComponent }
 ];
 

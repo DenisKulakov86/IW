@@ -135,6 +135,7 @@ export class HistorySatate {
         return acc;
       }, []);
     }
+    
     if (!state.reverse) historys = historys.reverse();
     return historys;
   }

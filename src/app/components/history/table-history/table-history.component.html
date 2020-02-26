@@ -20,9 +20,8 @@
     <th mat-header-cell *matHeaderCellDef>Цена</th>
     <td mat-cell *matCellDef="let element">{{ element.total }}</td>
     <td mat-footer-cell *matFooterCellDef>
-      {{ getTotal() | currency: "RUB":"symbol-narrow":"0.0" }}<br> ({{
-        getDiscount() | currency: "RUB":"symbol-narrow":"0.0"
-      }})
+      {{ getTotal() | currency: "RUB":"symbol-narrow":"0.0" }}<br />
+      (скидка {{ getDiscount() | currency: "RUB":"symbol-narrow":"0.0" }})
     </td>
   </ng-container>
 

@@ -9,7 +9,14 @@
     <!-- fixedInViewport  -->
     <!-- [fixedTopGap]="56" -->
     <!-- [mode]="'over'" -->
-    <mat-toolbar>Menu</mat-toolbar>
+    <mat-toolbar>
+      <!-- <ng-container *ngIf="user$ | async as user" >
+        <ul >
+          <li>{{user?.displayName}}</li>
+          <li class="mat-body">{{user?.email}}</li>
+        </ul>
+      </ng-container> -->
+    </mat-toolbar>
     <mat-nav-list>
       <a
         *ngFor="let link of links"
@@ -22,7 +29,7 @@
     </mat-nav-list>
   </mat-sidenav>
 
-  <mat-sidenav-content #content>
+  <mat-sidenav-content >
     <mat-toolbar class="mat-elevation-z6" color="primary">
       <button
         type="button"
@@ -35,19 +42,21 @@
       </button>
       <span class="title">iw</span>
       <button class="btn-icon" mat-icon-button>
-         <mat-icon>format_color_fill</mat-icon>
+        <mat-icon>format_color_fill</mat-icon>
       </button>
       <button mat-icon-button [matMenuTriggerFor]="menu">
         <mat-icon>more_vert</mat-icon>
       </button>
-   
     </mat-toolbar>
     <!-- Add Content Here -->
-    <!-- {{drawer.mode}} -->
+
+    <button mat-raised-button (click)="getSales()">Get Sales</button>
+    <button mat-raised-button (click)="removeBooks()">Remove Books</button>
+    <button mat-raised-button (click)="createSales()">Create Sales</button>
     <mat-toolbar>
       <span>{{ title }}</span>
     </mat-toolbar>
-    <ng-container *ngIf="!(loading$ | async); else loading">
+    <!-- <ng-container *ngIf="!(loading$ | async); else loading"> -->
       <ng-container *ngIf="!(error$ | async); else retry">
         <div
           class="mat-typography container-page"
@@ -56,7 +65,7 @@
           <router-outlet #outlet="outlet"></router-outlet>
         </div>
       </ng-container>
-    </ng-container>
+    <!-- </ng-container> -->
     <ng-template #loading>
       <p>
         Loading...
@@ -71,33 +80,12 @@
       </div>
     </ng-template>
     <!--  -->
-
-    <!-- <button class="btn-fly" disabled  (click)="add()" mat-fab>
-         <mat-icon>add</mat-icon>
-      </button>
-      <button class="btn-fly btn-delete " disabled (click)="delete()" mat-fab>
-         <mat-icon>delete</mat-icon>
-      </button>
-      <button class="btn-fly btn-edit" (click)="edit()" mat-fab>
-         <mat-icon>edit</mat-icon>
-      </button>
-      <button class="btn-fly btn-updata"  (click)="update()" mat-fab>
-         <mat-icon>update</mat-icon>
-      </button>
-      <button class="btn-fly btn-get" (click)="get()" mat-fab>
-         <mat-icon>get_app</mat-icon>
-      </button> -->
   </mat-sidenav-content>
 </mat-sidenav-container>
 
 <mat-menu [xPosition]="'before'" #menu="matMenu">
   <!-- start Authorization -->
-  <button (click)="signIn()" *ngIf="!(isSignedIn$ | async)" mat-menu-item>
-    Войти
-  </button>
-  <button (click)="signOut()" *ngIf="isSignedIn$ | async" mat-menu-item>
-    Выйти
-  </button>
+  <button (click)="signOut()" mat-menu-item>Выйти</button>
   <!-- end  Authorization -->
   <!--start THEME -->
   <mat-checkbox [formControl]="isDarkOrLight" class="mat-menu-item">

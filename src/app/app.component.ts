@@ -1,5 +1,4 @@
 import { Component, OnInit, AfterViewInit, HostBinding, HostListener } from '@angular/core';
-import { DriveStore } from './store/drive.store';
 import { merge, Observable } from 'rxjs';
 import { ThemeService } from './service/theme.service';
 import { Store, Select } from '@ngxs/store';
@@ -19,7 +18,6 @@ export class AppComponent implements AfterViewInit, OnInit {
 
   title = 'iw';
   constructor(
-    private driveStore: DriveStore,
     private theme: ThemeService,
     private store: Store
   ) { }

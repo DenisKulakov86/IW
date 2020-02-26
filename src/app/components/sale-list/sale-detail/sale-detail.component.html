@@ -6,14 +6,13 @@
   <button
     (click)="save()"
     class="save-btn"
-    [disabled]="formSale.invalid"
+    [disabled]="formSale.invalid || formSale.pristine"
     mat-raised-button
     color="primary"
   >
     Сохранить
   </button>
 </mat-toolbar>
-
 <section *ngIf="!(loading$ | async); else loading" class="container-page ">
   <h2 class="date">
     {{ date$ | async | date: "EE, d MMM yyyy" }}

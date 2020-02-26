@@ -21,7 +21,7 @@ export class FlyDirective implements OnInit, OnDestroy {
 
   }
   ngOnInit() {
-    if (!this.offset) this.offset = 200;
+    if (!this.offset) this.offset = 250;
     this.nativEl = this.matFab._elementRef.nativeElement;
     this.sub = this.breakpointObserver.observe(Breakpoints.Handset)
       .pipe(map(result => result.matches))
@@ -32,8 +32,6 @@ export class FlyDirective implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log("ngOnDestroy");
-
     this.sub && this.sub.unsubscribe();
   }
 

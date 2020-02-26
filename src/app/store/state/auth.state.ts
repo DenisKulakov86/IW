@@ -1,67 +1,75 @@
-import { State, NgxsAfterBootstrap, StateContext, Action, NgxsOnInit, Selector, Store } from '@ngxs/store';
-import { SignIn, SignOut, UpdateSigninStatus, InitSession } from '../actions/auth.actions';
-import { Router } from '@angular/router';
-import { environment } from 'src/environments/environment';
-
-export interface GapiStateModel {
-    // googleAuth: gapi.auth2.GoogleAuth | null;
-    googleUser: gapi.auth2.GoogleUser | null;
-    isSignedIn: boolean
+import {
+  State,
+  Selector,
+  StateContext,
+  Action,
+  Actions,
+  ofActionDispatched,
+  NgxsAfterBootstrap,
+  ofActionSuccessful
+} from "@ngxs/store";
+import { AngularFireAuth } from "@angular/fire/auth";
+import { SignIn, SignOut, SetUser } from "../actions/auth.actions";
+import { from } from "rxjs";
+import * as firebase from "firebase/app";
+import { AuthenticationService } from "src/app/service/auth.service";
+import { Router } from "@angular/router";
+import { NgZone } from "@angular/core";
+import { tap } from "rxjs/operators";
+export interface User {
+  uid: string;
+  email: string;
+  photoURL?: string;
+  displayName?: string;
+  somethingCustom?: string;
 }
-@State<GapiStateModel>({
-    name: 'authorization',
-    defaults: {
-        // googleAuth: null,
-        googleUser: null,
-        isSignedIn: environment.gooleDrive ? false : true
-    }
+@State<User>({
+  name: "Auth",
+  defaults: null
 })
-export class AuthState implements NgxsAfterBootstrap, NgxsOnInit {
+export class AuthState implements NgxsAfterBootstrap {
+  constructor(
+    private auth: AuthenticationService,
+    private router: Router,
+    private actions: Actions
+  ) {}
+  ngxsAfterBootstrap(ctx: StateContext<User>) {}
+  ngxsOnInit(ctx: StateContext<User>) {
+    this.actions
+      .pipe(ofActionDispatched(SignOut))
+      .subscribe(() => this.router.navigate(["/login"]));
+    this.actions
+      .pipe(ofActionSuccessful(SignIn))
+      .subscribe(() => this.router.navigate(["/"]));
+  }
 
-    ngxsAfterBootstrap(ctx: StateContext<GapiStateModel>) { }
-    ngxsOnInit(ctx: StateContext<GapiStateModel>) { }
+  @Selector()
+  static user(state: User) {
+    console.log("Selector user", state);
 
-    @Action(InitSession)
-    initSession(ctx: StateContext<GapiStateModel>) {
-        let googleAuth = gapi.auth2.getAuthInstance();
-        googleAuth.isSignedIn.listen((isSignedIn) => {
-            ctx.dispatch(new UpdateSigninStatus(isSignedIn))
-        });
-        ctx.patchState({
-            // googleAuth,
-            isSignedIn: googleAuth.isSignedIn.get()
-        });
-    }
+    return state;
+  }
 
-    @Action(SignIn)
-    signIn(ctx: StateContext<GapiStateModel>) {
-        let googleAuth = gapi.auth2.getAuthInstance();
-        //const googleAuth = ctx.getState().googleAuth;
-        try {
-            return googleAuth.signIn({ prompt: "select_account" });
-        }
-        catch{
-            throw new Error("googleAuth is unset")
-        }
-    }
+  @Selector()
+  static isSignedIn(state: User) {
+    return !!state;
+  }
 
-    @Action(SignOut)
-    signOut(ctx: StateContext<GapiStateModel>) {
-        let googleAuth = gapi.auth2.getAuthInstance();
-        //const googleAuth = ctx.getState().googleAuth;
-        try {
-            googleAuth.signOut();
+
+  @Action(SignIn)
+  signIn(ctx: StateContext<User>) {
+    return from(this.auth.googleSignin()).pipe(
+      tap(
+        ({
+          user: { uid, email, photoURL, displayName }
+        }: firebase.auth.UserCredential) => {
+          ctx.setState({ uid, email, photoURL, displayName });
         }
-        catch{
-            throw new Error("googleAuth is unset")
-        }
-    }
-    @Action(UpdateSigninStatus)
-    updateSigninStatus(ctx: StateContext<GapiStateModel>, { isSignedIn }) {
-        ctx.patchState({ isSignedIn });
-    }
-    @Selector()
-    static isSignedIn(state: GapiStateModel) {
-        return state.isSignedIn;
-    }
+      )
+    );
+  }
+  @Action(SignOut)
+  signOut(ctx: StateContext<User>) {
+    return from(this.auth.signOut()).pipe(tap(() => ctx.setState(null)));
+  }
 }
