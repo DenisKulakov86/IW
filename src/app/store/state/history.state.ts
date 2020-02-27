@@ -17,7 +17,7 @@ import {
 } from "../actions/history.action";
 import { from, of } from "rxjs";
 import { switchMap, switchMapTo, map } from "rxjs/operators";
-import { SaleState, SaleStateModel } from "./sale.state";
+import { SaleState } from "./sale.state";
 import { HistoryTable } from "src/app/components/history/table-history/table-history.component";
 import { Sale } from "src/app/models/sale.model";
 

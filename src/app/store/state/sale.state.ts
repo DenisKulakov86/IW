@@ -1,4 +1,4 @@
-import { Sale } from "src/app/models/sale.model";
+import { Sale, SaleStateModel } from "src/app/models/sale.model";
 import {
   State,
   NgxsOnInit,
@@ -17,7 +17,7 @@ import {
   iif,
   insertItem
 } from "@ngxs/store/operators";
-import { from, of, empty, Observable } from "rxjs";
+import { from, of, empty, Observable, throwError } from "rxjs";
 import {
   pluck,
   tap,
@@ -28,27 +28,22 @@ import {
   catchError,
   take,
   retry,
-  delay
+  delay,
+  switchMapTo
 } from "rxjs/operators";
 import { AuthState } from "./auth.state";
 import {
-  GetSales,
-  SetBaseInfo,
-  DeleteBaseInfo,
   DeleteSale,
   ChangeSale,
-  UploadSales,
-  GetSale,
   NewSale,
   SaveSale,
   AddSale,
-  SetSales
+  SetSales,
+  SelectSale,
+  UpdateSale
 } from "../actions/sale.actions";
-import { File } from "../../models/file.model";
-import { SalesService } from "src/app/service/sales.service";
 
 import * as moment from "moment";
-import { FireDataBaseService } from "src/app/service/firedatabase";
 import {
   AngularFireDatabase,
   AngularFireList,
@@ -69,12 +64,7 @@ function insertOrUpdateSale(id: any, loadedSale?: Sale) {
   );
 }
 
-export interface SaleStateModel {
-  sales: Sale[];
-  error: any;
-  select: Sale;
-  loading: boolean;
-}
+
 
 @State<SaleStateModel>({
   name: "sales",
@@ -86,8 +76,6 @@ export interface SaleStateModel {
   }
 })
 export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
-  // salesRef$: Observable<AngularFireList<Sale>>;
-  // sales$: Observable<SnapshotAction<Sale>[]>;
   saleRef: AngularFireList<Sale>
   constructor(
     private db: AngularFireDatabase,
@@ -98,20 +86,24 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
     let salesRef$ = this.store.select(AuthState.user)
       .pipe(map(user => user ? this.db.list<Sale>(`${user.uid}/sale`) : null));
 
-    salesRef$.subscribe(ref => this.saleRef = ref)
+    salesRef$.subscribe(ref => this.saleRef = ref);
 
     salesRef$.pipe(
-      switchMap((ref) => ref ? ref.snapshotChanges() : empty()),
+      switchMap((ref) => {
+        if (ref) {
+          ctx.patchState({ loading: true });
+          return ref.snapshotChanges()
+        } else {
+          return empty()
+        }
+      }),
       map(change => change.map((c): Sale => ({ ...c.payload.val(), id: c.key, }))),
+      // switchMap(() => throwError("something Error"))
     )
-      .subscribe(sales => {
-        ctx.dispatch(new SetSales(sales))
-      });
-
-
-
-    // this.store.select(SaleState.loading).subscribe(console.log)
-
+      .subscribe(
+        sales => ctx.dispatch(new SetSales(sales)),
+        error => ctx.patchState({ error, loading: false })
+      );
   }
 
   ngxsAfterBootstrap(ctx: StateContext<SaleStateModel>) {
@@ -120,26 +112,21 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
 
   @Action(SetSales)
   setSales(ctx: StateContext<SaleStateModel>, { sales }: SetSales) {
-    ctx.patchState({ sales, loading: false });
+    ctx.patchState({ sales, loading: false, error: null });
   }
 
-  @Action(GetSales)
-  getSales(ctx: StateContext<SaleStateModel>) {
-    //this.db.getSales();
+  @Action(SelectSale)
+  getSales(ctx: StateContext<SaleStateModel>, { id }: SelectSale) {
+    let sales = ctx.getState().sales;
+    let select = sales.find(s => s.id === id);
+    ctx.patchState({ select });
   }
 
 
   @Action(DeleteSale)
   deleteSale(ctx: StateContext<SaleStateModel>, { id }: DeleteSale) {
-
+    ctx.patchState({ loading: true })
     this.saleRef.remove(id);
-    // ctx.setState(
-    //   patch({
-    //     sales: removeItem<Sale>(s => s.id === id)
-    //   })
-    // );
-    // saveSales(ctx);
-    //do api
   }
 
   @Action(NewSale)
@@ -147,17 +134,10 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
     let newSale: Sale = {
       discount: 0,
       productList: [],
-      timestamp: null,
-      id: null
     };
     ctx.patchState({ select: newSale });
   }
-  @Action(GetSale)
-  getSale(ctx: StateContext<SaleStateModel>, { id }: GetSale) {
-    let state = ctx.getState();
-    let sale = state.sales.find(s => s.id == id);
-    ctx.patchState({ select: sale });
-  }
+
   @Action(ChangeSale)
   changeSale(
     ctx: StateContext<SaleStateModel>,
@@ -175,36 +155,31 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
   @Action(SaveSale)
   saveSale(ctx: StateContext<SaleStateModel>) {
     let select = ctx.getState().select;
-    if (!select.productList.length) {
-      // if (!select.id) return;
-      // else this.store.dispatch(new DeleteSale(select.id));
-    } else {
-      if (!select.id) {
-        let id = Math.max(...ctx.getState().sales.map(s => s.id), 0) + 1;
-        select = {
-          ...select,
-          timestamp: moment().valueOf(),
-          id
-        };
-      }
-      ctx.setState(
-        patch({
-          sales: insertOrUpdateSale(select.id, select)
-        })
-      );
+    if (select.id) {
+      ctx.dispatch(new UpdateSale());
     }
+    else {
+      ctx.dispatch(new AddSale())
+    }
+    // this.saleRef.push(select).then(r => console.log())
+
+    // ctx.setState(
+    //   patch({
+    //     sales: insertOrUpdateSale(select.id, select)
+    //   })
+    // );
   }
 
   @Action(AddSale)
   addSale(ctx: StateContext<SaleStateModel>) {
-    let sale = ctx.getState().select;
-    // return this.db.addSale({
-    //   ...sale
-    //   // timestamp: moment().valueOf()
-    // });
-    // return from(this.db.addSale(sale)).pipe(
-    //   tap(res => console.log("Add Sale", res))
-    // );
+    let select = ctx.getState().select;
+    this.saleRef.push(select)
+  }
+
+  @Action(UpdateSale)
+  updateSale(ctx: StateContext<SaleStateModel>) {
+    let select = ctx.getState().select;
+    this.saleRef.update(select.id, select);
   }
   @Selector()
   static loading(state: SaleStateModel) {

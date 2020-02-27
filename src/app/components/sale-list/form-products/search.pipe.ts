@@ -20,12 +20,11 @@ export class SearchPipe implements PipeTransform {
 
     return combineLatest(this.select$.pipe(map(s => s.productList.map(p => p.name))), this.names$)
       .pipe(
-        // tap(console.log),
-        map(([busyName, names]) => names.filter(n => !busyName.includes(n) || n === value )),
-        // tap(console.log),
+        // tap(([busy, allname])=>console.log("busy", busy, "allname", allname)),
+        map(([busyName, names]) => names.filter(n => !busyName.includes(n) || n.toLocaleUpperCase().includes(value.trim().toLocaleUpperCase()))),
+        // tap((freename)=>console.log("freename", freename, "value", value)),
         map(names => names.filter(n => n.includes(value.trim()))),
         // tap(console.log),
-
       )
   }
 }

@@ -134,9 +134,9 @@ export class NavigationComponent implements OnInit, OnDestroy {
     this.store.dispatch(new SignOut());
   }
 
-  getSales() {
-    this.store.dispatch(new GetSales());
-  }
+  // getSales() {
+  //   this.store.dispatch(new GetSales());
+  // }
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();

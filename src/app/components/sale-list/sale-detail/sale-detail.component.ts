@@ -52,11 +52,10 @@ import {
   ChangeSale,
   DeleteSale,
   GetSales,
-  UploadSales,
   NewSale,
   SaveSale,
-  GetSale,
-  AddSale
+  AddSale,
+  SelectSale
 } from "src/app/store/actions/sale.actions";
 import { MatExpansionPanel } from "@angular/material/expansion";
 import { MyErrorStateMatcher } from "../../default.error-matcher";
@@ -73,7 +72,7 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
   title$: Observable<string>;
   sale$: Observable<Sale>;
-  date$: Observable<Date | number>;
+  date$: Observable<number>;
 
   formSale: FormGroup;
   formNewProduct: FormGroup;
@@ -100,7 +99,7 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     private activeRoute: ActivatedRoute,
     private el: ElementRef,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.isShodow$ = fromEvent(document.body, "scroll").pipe(
@@ -119,9 +118,9 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     this.sale$ = this.activeRoute.queryParamMap.pipe(
       pluck("params", "id"),
       mergeMap(id =>
-        isNaN(+id)
+        id === undefined
           ? this.store.dispatch(new NewSale())
-          : this.store.dispatch(new GetSale(id))
+          : this.store.dispatch(new SelectSale(id))
       ),
       mergeMap(() => this.store.selectOnce(SaleState.select)),
       publishReplay(1),
@@ -147,16 +146,9 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         .pipe(
           filter(_ => this.formSale.valid),
           debounceTime(300),
-          distinctUntilChanged(
-            (v1, v2) => JSON.stringify(v1) === JSON.stringify(v2)
-          )
+          distinctUntilChanged((v1, v2) => JSON.stringify(v1) === JSON.stringify(v2))
         )
-        .subscribe(value => {
-          this.store.dispatch(
-            // new ChangeSale(this.discount.value, this.arrayProductControl.value)
-            new ChangeSale(value)
-          );
-        })
+        .subscribe(value => this.store.dispatch(new ChangeSale(value)))
     );
   }
 
@@ -186,10 +178,7 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   save() {
-    this.store
-      .dispatch(new AddSale())
-      //.subscribe(() => this.router.navigate(["sale-list"]));
-    // this.store.dispatch(new SaveSale());
+    this.store.dispatch(new SaveSale())
   }
   ngOnDestroy() {
     this.subscription.unsubscribe();
@@ -208,9 +197,7 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     let value = control.value as Sale;
     let discount = control.get("discount");
 
-    let diff =
-      value.productList.reduce((s, p) => (s += p.price * p.count), 0) -
-      value.discount;
+    let diff = value.productList.reduce((s, p) => (s += p.price * p.count), 0) - value.discount;
     if (diff <= 0) {
       discount.setErrors({ invalidDiscount: true });
       return { invalidDiscount: true };
@@ -222,8 +209,8 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.discount.hasError("min")
       ? "Скидка меньше 0"
       : this.discount.hasError("invalidDiscount")
-      ? "Скидка больше цены"
-      : "";
+        ? "Скидка больше цены"
+        : "";
   }
   onChange(control: FormControl, addVal) {
     control.setValue(+control.value + addVal);

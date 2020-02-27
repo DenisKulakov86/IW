@@ -9,7 +9,7 @@ import {
   ofActionSuccessful
 } from "@ngxs/store";
 import { AngularFireAuth } from "@angular/fire/auth";
-import { SignIn, SignOut, SetUser } from "../actions/auth.actions";
+import { SignIn, SignOut } from "../actions/auth.actions";
 import { from } from "rxjs";
 import * as firebase from "firebase/app";
 import { Router } from "@angular/router";
@@ -30,7 +30,6 @@ export class AuthState implements NgxsAfterBootstrap {
   ) { }
   ngxsAfterBootstrap(ctx: StateContext<UserSateModel>) { }
   ngxsOnInit(ctx: StateContext<UserSateModel>) {
-    // this.afAuth.authState.subscribe(state => ctx.dispatch(new SetUser(this.getUserFromState(state))));
     this.actions
       .pipe(ofActionDispatched(SignOut))
       .subscribe(() => this.router.navigate(["/login"]));
@@ -48,15 +47,20 @@ export class AuthState implements NgxsAfterBootstrap {
   static isSignedIn(state: UserSateModel) {
     return !!state.user;
   }
-  @Action(SetUser)
-  setUser({ patchState, setState }: StateContext<UserSateModel>, { user }: SetUser) {
-  }
+ 
 
   @Action(SignIn)
   signIn({ patchState }: StateContext<UserSateModel>) {
     return from(this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()))
       .pipe(tap(({ user }) => patchState({ user: this.getUserFromState(user) })))
   }
+
+  // @Action(SignIn)
+  // signInAnonymously({ patchState }: StateContext<UserSateModel>) {
+  //   return from(this.afAuth.auth.signInAnonymously())
+  //     .pipe(tap(({ user }) => patchState({ user: this.getUserFromState(user) })))
+  // }
+
   @Action(SignOut)
   signOut({ patchState, setState }: StateContext<UserSateModel>) {
     return from(this.afAuth.auth.signOut())

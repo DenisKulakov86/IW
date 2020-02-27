@@ -1,5 +1,18 @@
 import { Moment } from 'moment';
 
+export interface SaleStateModel {
+    sales: Sale[];
+    error: any;
+    select: Sale;
+    loading: boolean;
+  }
+
+export interface SaleList {
+    id: any;
+    total: number;
+    count: number;
+  }
+
 
 export interface Product {
     name: string,

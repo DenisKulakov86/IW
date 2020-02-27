@@ -6,10 +6,11 @@ import {
 } from "@angular/core";
 import { FormGroup, FormControl } from "@angular/forms";
 import { Observable, Subject } from "rxjs";
-import { Select } from "@ngxs/store";
+import { Select, Store } from "@ngxs/store";
 import { NameProductsSate } from "src/app/store/state/name-products.state";
 import { MatInput } from "@angular/material/input";
 import { MyErrorStateMatcher } from "../../default.error-matcher";
+import { AddNameProduct } from 'src/app/store/actions/name-products.action';
 
 @Component({
   selector: "app-form-products",
@@ -22,7 +23,7 @@ export class FormProductsComponent implements OnInit {
 
   matcher = new MyErrorStateMatcher();
 
-  constructor() {}
+  constructor(private store: Store) {}
 
   ngOnInit() {
     this.count.statusChanges.subscribe(console.log);
@@ -51,6 +52,9 @@ export class FormProductsComponent implements OnInit {
 
   setName(name: string) {
     this.name.setValue(name);
+  }
+  addName(str){
+    this.store.dispatch(new AddNameProduct(str));
   }
 
   contError() {

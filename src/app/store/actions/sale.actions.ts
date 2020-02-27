@@ -9,26 +9,13 @@ export class SetSales {
   constructor (public sales: Sale[]){}
 }
 
-export class UploadSales {
-  static readonly type = "[Sale] Upload Sale";
-}
-
-export class SetBaseInfo {
-  static readonly type = "[Sale] Set Base Info";
-  constructor(public baseInfo: File) {}
-}
-
-export class DeleteBaseInfo {
-  static readonly type = "[Sale] Delete Base Info";
-}
-
 export class DeleteSale {
   static readonly type = "[Sale] Delete Sale";
   constructor(public id: any) {}
 }
 
-export class GetSale {
-  static readonly type = "[Sale] Get Sale";
+export class SelectSale {
+  static readonly type = "[Sale] Select Sale";
   constructor(public id: any) {}
 }
 
@@ -42,12 +29,9 @@ export class SaveSale {
 export class AddSale {
   static readonly type = "[Sale] Add Sale";
 }
-
-// export class ChangeSale {
-//     static readonly type = '[Sale] Change Sale';
-//     constructor(public id: number, public sale: Sale) {
-//      }
-// }
+export class UpdateSale {
+  static readonly type = "[Sale] Update Sale";
+}
 
 export class ChangeSale {
   static readonly type = "[Sale] Change Sale";
