@@ -11,7 +11,7 @@ import {
 import { GeneratorBase } from "../../service/generator-sale.service";
 import { Subject, Observable, fromEvent } from "rxjs";
 import { Store, Select } from "@ngxs/store";
-import { takeUntil, switchMap } from "rxjs/operators";
+import { takeUntil, switchMap, filter, map } from "rxjs/operators";
 import { HistorySatate } from "src/app/store/state/history.state";
 import { trigger, transition, style, animate } from "@angular/animations";
 import { MatSidenavContent } from "@angular/material/sidenav";
@@ -41,16 +41,35 @@ export class HistoryComponent implements OnInit, OnDestroy {
   @Select(HistorySatate.getHistory) historys$: Observable<any>;
   destroy$: Subject<void> = new Subject();
 
+  scroll: Observable<Event>
+
   constructor(
     private genereteService: GeneratorBase,
     private store: Store,
     private el: ElementRef
-  ) {}
+  ) { }
 
   ngOnInit() {
-    fromEvent(document.body, "scroll")
+    let NativeComponent = this.el.nativeElement as HTMLElement;
+    this.scroll = fromEvent(NativeComponent, "scroll")
       .pipe(takeUntil(this.destroy$))
-      .subscribe(()=>console.log("history scroll"));
+    this.scroll
+      .pipe(
+        map(() => [NativeComponent.clientHeight, NativeComponent.getBoundingClientRect().bottom]),
+        filter(([clientHeight, bottom]) => {
+          console.log(`bottom - clientHeight: ${bottom - clientHeight}`);
+          
+        return  bottom < clientHeight
+        })
+      )
+      .subscribe(() => {
+        console.log(
+
+          (this.el.nativeElement as HTMLElement).clientHeight,
+          (this.el.nativeElement as HTMLElement).getBoundingClientRect().bottom
+        );
+      })
+
   }
   ngOnDestroy() {
     this.destroy$.next();

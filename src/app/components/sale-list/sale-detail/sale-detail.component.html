@@ -3,7 +3,7 @@
     <mat-icon>arrow_back</mat-icon>
   </button>
   <span>{{ title$ | async }} </span>
-  <button (click)="save()" class="save-btn" [disabled]="formSale.invalid || formSale.pristine" mat-raised-button
+  <button (click)="save()" class="save-btn" [disabled]="formSale.invalid" mat-raised-button
     color="primary">
     Сохранить
   </button>
@@ -58,7 +58,7 @@
               </span>
             </div>
             <ng-template #dsc>
-              <span> Подробно </span>
+              <span> Редактировать </span>
             </ng-template>
           </mat-panel-description>
         </mat-expansion-panel-header>

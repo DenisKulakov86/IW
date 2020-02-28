@@ -1,12 +1,7 @@
 <section class="history">
   <app-selector></app-selector>
-  <ng-container *ngFor="let h of historys$ | async; let i = index">
-    <app-table-history
-      @fadeIn
-      [data]="h"
-      class="history__table"
-    ></app-table-history>
-  </ng-container>
+  <app-table-history @fadeIn *ngFor="let h of historys$ | async; let i = index" [data]="h" class="history__table">
+  </app-table-history>
 </section>
 
 <button mat-flat-button color="primary" (click)="textarea.value = generete()">

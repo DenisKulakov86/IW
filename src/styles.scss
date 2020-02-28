@@ -16,6 +16,10 @@ $iw-dark-theme: mat-dark-theme($iw-primary, $iw-accent, $iw-warn);
 @include angular-material-theme($iw-light-theme);
 @include custom-theme($iw-light-theme);
 
+.bg-default{
+  background: mat-color($iw-primary);
+}
+
 
 .dark-theme {
 

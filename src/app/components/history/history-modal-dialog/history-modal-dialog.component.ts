@@ -20,8 +20,7 @@ export class HistoryModalDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: HistoryDialogData
   ) { }
 
-  ngOnInit() {
-  }
+  ngOnInit() { }
   onSelect(i) {
     this.dialogRef.close(i);
   }

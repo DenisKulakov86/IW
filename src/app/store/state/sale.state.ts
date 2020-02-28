@@ -146,7 +146,7 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
     ctx.setState(
       patch({
         select: patch({
-          discount,
+          discount: Number(discount),
           productList
         })
       })
@@ -173,7 +173,14 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
   @Action(AddSale)
   addSale(ctx: StateContext<SaleStateModel>) {
     let select = ctx.getState().select;
-    this.saleRef.push(select)
+    let sale: Sale = {
+      ...select,
+      timestamp: moment().valueOf()
+    }
+    return from(this.saleRef.push(sale))
+      .pipe(
+        tap(ref => ctx.patchState({ select: { ...sale, id: ref.key } }))
+      )
   }
 
   @Action(UpdateSale)

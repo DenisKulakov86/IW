@@ -9,7 +9,7 @@ export type Param =
   | "reverse";
 export class SetHistory<T = HistorySatateModel> {
   static readonly type = "[History] Set History";
-  constructor(public param: keyof T, public value: T[keyof T]) {}
+  constructor(public key: keyof T, public value: T[keyof T]) {}
 }
 export class ToggleReverse {
     static readonly type = "[History] Toggle Reverse";

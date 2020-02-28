@@ -34,28 +34,37 @@ export class SelectorComponent implements OnInit, OnDestroy {
   destroy$: Subject<void> = new Subject();
   dates: moment.Moment[];
   title$: Observable<string>;
+
+
+
   showSelector$: Observable<boolean>;
   view$: Observable<string>;
-  start$ = this.store.select(HistorySatate.getValue("start"));
-  end$ = this.store.select(HistorySatate.getValue("end"));
+  
+  @Select(HistorySatate.getValue("start")) 
+  start$: Observable<moment.Moment>
+  
+  @Select(HistorySatate.getValue("end")) 
+  end$: Observable<moment.Moment>
 
-  reverse$ = this.store.select(HistorySatate.getValue("reverse"));
+  @Select(HistorySatate.getValue("reverse")) 
+  reverse$: Observable<boolean>;
+
 
   constructor(public dialog: MatDialog, public store: Store) {
     // moment.locale("ru");
   }
 
   ngOnInit() {
-    let periodAndSelect = combineLatest(
+    let periodAndSelect$ = combineLatest(
       this.store.select(HistorySatate.getValue("dialogPeriod")),
       this.store.select(HistorySatate.getValue("selectPeriod"))
     );
 
-    this.showSelector$ = periodAndSelect.pipe(
+    this.showSelector$ = periodAndSelect$.pipe(
       map(([dp, s]: [string[], number]) => (dp.length - 1 == s ? true : false))
     );
 
-    this.title$ = periodAndSelect.pipe(
+    this.title$ = periodAndSelect$.pipe(
       map(([dp, s]: [string[], number]) => dp[s])
     );
     this.view$ = combineLatest(
@@ -80,23 +89,17 @@ export class SelectorComponent implements OnInit, OnDestroy {
     let dialogRef = this.dialog.open(HistoryModalDialogComponent, {
       minWidth: "300px",
       data: {
-        period: this.store.selectSnapshot(
-          HistorySatate.getValue("dialogPeriod")
-        ),
-        select: this.store.selectSnapshot(
-          HistorySatate.getValue("selectPeriod")
-        )
+        period: this.store.selectSnapshot(HistorySatate.getValue("dialogPeriod")),
+        select: this.store.selectSnapshot(HistorySatate.getValue("selectPeriod"))
       },
-      autoFocus: false
+      autoFocus: false,
+      // hasBackdrop: false
     });
 
-    dialogRef
-      .afterClosed()
-      .toPromise()
-      .then(select => {
-        if (select === undefined) return;
-        this.store.dispatch(new SelectPeriod(select));
-      });
+    dialogRef.afterClosed().toPromise().then(select => {
+      if (select === undefined) return;
+      this.store.dispatch(new SelectPeriod(select));
+    });
   }
 
   openDialodView() {
@@ -109,13 +112,10 @@ export class SelectorComponent implements OnInit, OnDestroy {
       autoFocus: false
     });
 
-    dialogRef
-      .afterClosed()
-      .toPromise()
-      .then(select => {
-        if (select === undefined) return;
-        this.store.dispatch(new SelectView(select));
-      });
+    dialogRef.afterClosed().toPromise().then(select => {
+      if (select === undefined) return;
+      this.store.dispatch(new SelectView(select));
+    });
   }
 
   toggleReverse() {

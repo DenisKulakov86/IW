@@ -28,7 +28,7 @@
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
       <span class="title">iw</span>
-      <button class="btn-icon" mat-icon-button>
+      <button class="btn-icon" mat-icon-button [matMenuTriggerFor]="format_color_fill">
         <mat-icon>format_color_fill</mat-icon>
       </button>
       <button mat-icon-button [matMenuTriggerFor]="menu">
@@ -63,15 +63,39 @@
   </mat-sidenav-content>
 </mat-sidenav-container>
 
-<mat-menu [xPosition]="'before'" #menu="matMenu">
-  <!-- start Authorization -->
-  <button (click)="signOut()" mat-menu-item>Выйти</button>
-  <!-- end  Authorization -->
+
+<mat-menu #format_color_fill [xPosition]="'before'">
   <!--start THEME -->
   <mat-checkbox [formControl]="isDarkOrLight" class="mat-menu-item">
     Темная тема
   </mat-checkbox>
-  <button (click)="setIndigoTheme()" mat-menu-item>Indigo</button>
-  <button (click)="setGreenTheme()" mat-menu-item>Green</button>
+  <div class="circle-wrap">
+    <div (click)="setIndigoTheme()">
+      <div class="circle bg-default">
+        <mat-icon *ngIf="defTheme$ | async">check_circle</mat-icon>
+      </div>
+    </div>
+    <div (click)="setGreenTheme()">
+      <div class="circle bg-green">
+        <mat-icon  *ngIf="greenTheme$ | async">check_circle</mat-icon>
+      </div>
+    </div>
+    <div (click)="setDeepPurpleTheme()">
+      <div class="circle bg-purple" >
+        <mat-icon  *ngIf="purpleTheme$ | async">check_circle</mat-icon>
+      </div>
+    </div>
+    <div (click)="setPinkTheme()">
+      <div class="circle bg-pink">
+        <mat-icon  *ngIf="pinkTheme$ | async">check_circle</mat-icon>
+      </div>
+    </div>
+  </div>
   <!--end THEME -->
+</mat-menu>
+
+<mat-menu [xPosition]="'before'" #menu="matMenu">
+  <!-- start Authorization -->
+  <button (click)="signOut()" mat-menu-item>Выйти</button>
+  <!-- end  Authorization -->
 </mat-menu>

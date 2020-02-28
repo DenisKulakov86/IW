@@ -32,7 +32,7 @@ import {
   ofActionCompleted
 } from "@ngxs/store";
 import { AuthState } from "src/app/store/state/auth.state";
-import {  SignOut } from "src/app/store/actions/auth.actions";
+import { SignOut } from "src/app/store/actions/auth.actions";
 import { SaleState } from "src/app/store/state/sale.state";
 import { Sale } from "src/app/models/sale.model";
 import {
@@ -62,6 +62,11 @@ export class NavigationComponent implements OnInit, OnDestroy {
   @Select(SaleState.loading) loading$: Observable<boolean>;
   @Select(SaleState.error) error$: Observable<boolean>;
   @Select(AuthState.user) user$: Observable<User>;
+  @Select(ConfigState.theme) theme$: Observable<string>;
+  defTheme$: Observable<boolean>;
+  greenTheme$: Observable<boolean>;
+  purpleTheme$: Observable<boolean>;
+  pinkTheme$: Observable<boolean>;
   title: string;
   isDarkOrLight: FormControl = new FormControl(false);
   private destroy$ = new Subject<void>();
@@ -107,6 +112,12 @@ export class NavigationComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    let theme = this.theme$.pipe(map(t => t.split(" ")[1]))
+    this.defTheme$ = theme.pipe(map(t => t === THEME.indigo));
+    this.greenTheme$ = theme.pipe(map(t => t === THEME.green));
+    this.purpleTheme$ = theme.pipe(map(t => t === THEME.deepPpurple));
+    this.pinkTheme$ = theme.pipe(map(t => t === THEME.pink));
+
     this.isDarkOrLight.valueChanges
       .pipe(
         switchMap(() => this.store.dispatch(new ToggleDarkTheme())),
@@ -147,6 +158,12 @@ export class NavigationComponent implements OnInit, OnDestroy {
   }
   setIndigoTheme() {
     this.store.dispatch(new SetTheme(THEME.indigo));
+  }
+  setDeepPurpleTheme() {
+    this.store.dispatch(new SetTheme(THEME.deepPpurple));
+  }
+  setPinkTheme() {
+    this.store.dispatch(new SetTheme(THEME.pink));
   }
 
   prepareRoute(outlet: RouterOutlet) {

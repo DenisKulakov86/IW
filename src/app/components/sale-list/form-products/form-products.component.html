@@ -52,7 +52,7 @@
 
   <ng-template #search>
     <div class="search"  *ngIf="nameInput.value | search | async; let names" >
-      <button mat-flat-button color="primary" *ngIf="!names.length && name.valid" (mousedown)="addName(nameInput.value)" >Добавить</button>
+      <button mat-flat-button color="primary" *ngIf="!names.length && name.valid" (mousedown)="addName(nameInput.value)">Добавить</button>
       <mat-action-list class="search">
         <mat-list-item *ngFor="let name of names" (mousedown)="setName(name)">
           {{ name }}

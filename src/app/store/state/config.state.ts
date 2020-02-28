@@ -2,11 +2,12 @@ import { State, Selector, Action, StateContext } from '@ngxs/store';
 import { ToggleDarkTheme, SetTheme, } from '../actions/config.action';
 
 export enum THEME {
-    dark = 'dark-theme',
+    dark = "dark-theme",
     light = "light-theme",
     indigo = "default-theme",
-    green = "green-theme"
-
+    green = "green-theme",
+    deepPpurple = "deep-purple",
+    pink = "pink"
 }
 
 interface ConfigStateModel {
@@ -35,6 +36,6 @@ export class ConfigState {
     @Selector()
     static theme(state: ConfigStateModel) {
         return state.darkOrLight + " " + state.theme;
-       // return (state.darkOrLight ? state.darkOrLight + " " : "" )+ state.theme;
+        // return (state.darkOrLight ? state.darkOrLight + " " : "" )+ state.theme;
     }
 }

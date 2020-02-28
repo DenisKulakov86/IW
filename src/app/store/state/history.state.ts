@@ -143,12 +143,12 @@ export class HistorySatate {
   @Action(SetHistory)
   setHistory(
     { patchState, getState }: StateContext<HistorySatateModel>,
-    { param, value }: SetHistory
+    { key, value }: SetHistory
   ) {
     const state = getState();
     let newState = {};
     newState = { ...state };
-    newState[param] = value;
+    newState[key] = value;
     patchState(newState);
   }
 

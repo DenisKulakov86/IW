@@ -20,5 +20,8 @@
     .text-accent{
       color:  mat-color($accent);
     }
+    .bg-primary{
+      background: mat-color($primary);
+    }
   }
 

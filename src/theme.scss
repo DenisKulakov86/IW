@@ -5,7 +5,8 @@
 
 /* ======== Angular material custom themes ======== */ 
 
-
+// 103, 58, 183
+//673AB7
 .green-theme{
     $iw-primary: mat-palette($mat-green);
     $iw-accent: mat-palette($mat-amber, A200, A100, A400);
@@ -19,7 +20,57 @@
     
     &.dark-theme {
         @include angular-material-theme($iw-dark-theme);
+        @include custom-theme($iw-dark-theme);
     } 
+}
+
+.bg-green{
+    $bg: mat-palette($mat-green);
+    background: mat-color($bg);
+}
+
+.deep-purple{
+    $iw-primary: mat-palette($mat-deep-purple);
+    $iw-accent: mat-palette($mat-amber, A200, A100, A400);
+    $iw-warn: mat-palette($mat-red);
+
+    $iw-light-theme: mat-light-theme($iw-primary, $iw-accent, $iw-warn);
+    $iw-dark-theme: mat-dark-theme($iw-primary, $iw-accent, $iw-warn);
+
+    @include angular-material-theme($iw-light-theme);
+    @include custom-theme($iw-light-theme);
+    
+    &.dark-theme {
+        @include angular-material-theme($iw-dark-theme);
+        @include custom-theme($iw-dark-theme);
+    } 
+}
+
+.bg-purple{
+    $bg: mat-palette($mat-deep-purple);
+    background: mat-color($bg);
+}
+
+
+.pink{
+    $iw-primary: mat-palette($mat-pink);
+    $iw-accent: mat-palette($mat-blue-grey, A200, A100, A400);
+    $iw-warn: mat-palette($mat-red);
+
+    $iw-light-theme: mat-light-theme($iw-primary, $iw-accent, $iw-warn);
+    $iw-dark-theme: mat-dark-theme($iw-primary, $iw-accent, $iw-warn);
+
+    @include angular-material-theme($iw-light-theme);
+    @include custom-theme($iw-light-theme);
+    
+    &.dark-theme {
+        @include angular-material-theme($iw-dark-theme);
+        @include custom-theme($iw-dark-theme);
+    } 
+}
+.bg-pink{
+    $bg: mat-palette($mat-pink);
+    background: mat-color($bg);
 }
 
 
