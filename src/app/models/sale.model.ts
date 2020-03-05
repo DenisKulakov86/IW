@@ -32,7 +32,7 @@ export interface Product {
 export interface Sale {
     discount: number,
     productList: Product[],
-    timestamp?: number,
+    timestamp?: number | string,
     id?: any,
     // constructor(
     //     public discount: number,

@@ -91,7 +91,7 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
     salesRef$.pipe(
       switchMap((ref) => {
         if (ref) {
-          ctx.patchState({ loading: true });
+          // ctx.patchState({ loading: true });
           return ref.snapshotChanges()
         } else {
           return empty()
@@ -175,7 +175,7 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
     let select = ctx.getState().select;
     let sale: Sale = {
       ...select,
-      timestamp: moment().valueOf()
+      timestamp: moment().startOf('d').valueOf()
     }
     return from(this.saleRef.push(sale))
       .pipe(
@@ -210,12 +210,13 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
     dateFrom: moment.Moment,
     dateTo: moment.Moment = dateFrom
   ) {
-    return createSelector([SaleState], (state: SaleStateModel) => {
-      return state.sales
-        ? state.sales.filter(s =>
-          moment(s.timestamp).isBetween(dateFrom, dateTo, "day", "[]")
-        )
-        : [];
+    return createSelector([SaleState.sales], (sales: Sale[]) => {
+      let start, end;
+      start = Date.now();
+      let resSales = sales.filter(s => moment(s.timestamp).isBetween(dateFrom, dateTo, "day", "[]"));
+      end = Date.now();
+      console.log(`time select sales: ${end - start}`);
+      return resSales;
     });
   }
   static getSaleById(id: number) {

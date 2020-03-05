@@ -126,7 +126,7 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
       publishReplay(1),
       refCount()
     );
-    this.date$ = this.sale$.pipe(pluck("timestamp"));
+    this.date$ = this.sale$.pipe(pluck("timestamp"), map(ts=> Number(ts))) ;
 
     this.formSale = this.fb.group(
       {

@@ -37,14 +37,6 @@ $iw-dark-theme: mat-dark-theme($iw-primary, $iw-accent, $iw-warn);
   // @include mat-button-theme($btn-app-theme);
 }
 
-// .deep-purple{
-//   // @include angular-material-theme($my-custom-light-theme);
-//   // @include custom-theme($my-custom-light-theme);
-// }
-// .dark-theme.deep-purple{
-//   // @include angular-material-theme($my-custom-dark-theme);
-// }
-
 
 
 html {
@@ -63,7 +55,6 @@ html {
 *::after {
   box-sizing: inherit;
 }
-
 html,
 body {
   height: 100%;
@@ -72,6 +63,10 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
   margin: 0;
   background-color: #e7ebf0;
+}
+
+body{
+  position: relative;
 }
 
 ul {
@@ -94,4 +89,10 @@ ul {
   left: 0;
   right: 0;
   z-index: 1000;
+}
+
+.cdk-global-scrollblock{
+  position: initial !important;
+  overflow-y: auto !important;
+
 }

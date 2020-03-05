@@ -4,10 +4,10 @@ import { animation, trigger, animateChild, group, transition, animate, style, qu
 export const slideInAnimation =
     trigger('routeAnimations', [
         transition("* <=> *", [
-            style({ position: 'relative' }),
-            query(':enter, :leave', [style({ position: 'absolute',  width: '100%' })], { optional: true }),
+            style({ position: 'relative', overflowY: "hidden" }),
+            query(':enter, :leave', [style({ position: 'absolute', width: 'calc(100% - 10px)',   })], { optional: true }),
             query(":enter", [style({ opacity: 0 })], { optional: true }),
-            query(':leave', animate('300ms ease-out', style({ opacity: 0 })), { optional: true }),
+            query(':leave', animate('100ms ease-out', style({ opacity: 0 })), { optional: true }),
             query(':enter', animate('300ms ease-out', style({ opacity: 1 })), { optional: true }),
             // animate(200, style({ opacity: "*", "background-color": "*", }))
         ])
@@ -42,10 +42,10 @@ export const salesListAnim = trigger("salesListAnim", [
         // ], { optional: true}),
 
         query(":enter", [
-            style({ opacity: 0, transform: 'translateY(-100px)',   position: "absolute1" }),
+            style({ opacity: 0, transform: 'translateY(-100px)' }),
             stagger(-30, [
                 animate(150, style({ opacity: 1, transform: 'translateY(0)' }))
             ])
-        ], { optional: true,}),
+        ], { optional: true, }),
     ])
 ]);

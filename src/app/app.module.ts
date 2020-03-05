@@ -112,9 +112,10 @@ export function noop() {
     NgxsStoragePluginModule.forRoot({
       key: [
         ConfigState,
-        HistorySatate, 
+        // HistorySatate, 
         AuthState,
-        "sales.select"
+        // "sales.select"
+        SaleState
       ]
       // storage: StorageOption.SessionStorage
     }),

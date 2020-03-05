@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from "@angular/core";
-import { HistorySale } from "src/app/store/state/history.state";
+import HistorySales from 'src/app/models/history.model';
 
 export interface HistoryTable {
   name: string;
@@ -14,7 +14,7 @@ export interface HistoryTable {
 })
 export class TableHistoryComponent implements OnInit {
   displayedColumns: string[] = ["name", "count", "total"];
-  @Input() data: HistorySale = null;
+  @Input() data: HistorySales = null;
   constructor() {}
 
   ngOnInit() {}
