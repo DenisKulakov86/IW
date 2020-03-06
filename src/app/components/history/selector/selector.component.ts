@@ -20,7 +20,29 @@ import {
   SelectView
 } from "src/app/store/actions/history.action";
 import * as moment from "moment";
-import { takeUntil, map } from "rxjs/operators";
+import {
+  takeUntil,
+  map,
+  pairwise,
+  tap,
+  filter,
+  startWith,
+  switchMap
+} from "rxjs/operators";
+
+function instrument<T>(source: Observable<T>) {
+  return new Observable<T>(observer => {
+    console.log("source: subscribing");
+    const subscription = source
+      .pipe(tap(value => console.log("source emit: ", value)))
+      .subscribe(observer);
+    return () => {
+      subscription.unsubscribe();
+      console.log("source: unsubscribed");
+    };
+  });
+}
+
 @Component({
   selector: "app-selector",
   templateUrl: "./selector.component.html",
@@ -30,38 +52,39 @@ import { takeUntil, map } from "rxjs/operators";
 export class SelectorComponent implements OnInit, OnDestroy {
   dateFrom: FormControl = new FormControl();
   dateTo: FormControl = new FormControl();
-  dialogPeriod: string[];
   destroy$: Subject<void> = new Subject();
   dates: moment.Moment[];
   title$: Observable<string>;
 
-
-
   showSelector$: Observable<boolean>;
   view$: Observable<string>;
-  
-  @Select(HistorySatate.getValue("start")) 
-  start$: Observable<moment.Moment>
-  
-  @Select(HistorySatate.getValue("end")) 
-  end$: Observable<moment.Moment>
 
-  @Select(HistorySatate.getValue("reverse")) 
+  // @Select(HistorySatate.getValue("start"))
+  // start$: Observable<moment.Moment>
+
+  // @Select(HistorySatate.getValue("end"))
+  // end$: Observable<moment.Moment>
+
+  @Select(HistorySatate.getValue("reverse"))
   reverse$: Observable<boolean>;
-
 
   constructor(public dialog: MatDialog, public store: Store) {
     // moment.locale("ru");
   }
 
   ngOnInit() {
+    this.initFrom(this.dateFrom, "start");
+    this.initFrom(this.dateTo, "end");
+
     let periodAndSelect$ = combineLatest(
       this.store.select(HistorySatate.getValue("dialogPeriod")),
       this.store.select(HistorySatate.getValue("selectPeriod"))
-    );
+    ).pipe(tap(console.log));
 
     this.showSelector$ = periodAndSelect$.pipe(
-      map(([dp, s]: [string[], number]) => (dp.length - 1 == s ? true : false))
+      map(([dp, sp]: [string[], number]) =>
+        dp.length - 1 == sp ? true : false
+      )
     );
 
     this.title$ = periodAndSelect$.pipe(
@@ -71,14 +94,6 @@ export class SelectorComponent implements OnInit, OnDestroy {
       this.store.select(HistorySatate.getValue("dialogView")),
       this.store.select(HistorySatate.getValue("selectView"))
     ).pipe(map(([dv, s]: [string[], number]) => dv[s]));
-
-    this.dateFrom.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(v => this.store.dispatch(new SetHistory("start", v)));
-
-    this.dateTo.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(v => {
-      this.store.dispatch(new SetHistory("end", v));
-    });
   }
   ngOnDestroy() {
     this.destroy$.next();
@@ -89,17 +104,24 @@ export class SelectorComponent implements OnInit, OnDestroy {
     let dialogRef = this.dialog.open(HistoryModalDialogComponent, {
       minWidth: "300px",
       data: {
-        period: this.store.selectSnapshot(HistorySatate.getValue("dialogPeriod")),
-        select: this.store.selectSnapshot(HistorySatate.getValue("selectPeriod"))
+        period: this.store.selectSnapshot(
+          HistorySatate.getValue("dialogPeriod")
+        ),
+        select: this.store.selectSnapshot(
+          HistorySatate.getValue("selectPeriod")
+        )
       },
-      autoFocus: false,
+      autoFocus: false
       // hasBackdrop: false
     });
 
-    dialogRef.afterClosed().toPromise().then(select => {
-      if (select === undefined) return;
-      this.store.dispatch(new SelectPeriod(select));
-    });
+    dialogRef
+      .afterClosed()
+      .toPromise()
+      .then(select => {
+        if (select === undefined) return;
+        this.store.dispatch(new SelectPeriod(select));
+      });
   }
 
   openDialodView() {
@@ -111,14 +133,34 @@ export class SelectorComponent implements OnInit, OnDestroy {
       },
       autoFocus: false
     });
-
-    dialogRef.afterClosed().toPromise().then(select => {
-      if (select === undefined) return;
+    // instrument(dialogRef.afterClosed()).subscribe()
+    dialogRef.afterClosed().subscribe(select => {
+      debugger;
+      if (!Number.isNaN(select)) {
+        return;
+      }
       this.store.dispatch(new SelectView(select));
     });
   }
 
   toggleReverse() {
     this.store.dispatch(new ToggleReverse());
+  }
+
+  initFrom(control: FormControl, initVal: "start" | "end") {
+    this.store
+      .selectOnce(HistorySatate.getValue(initVal))
+      .pipe(
+        tap(start => control.patchValue(start)),
+        switchMap(start =>
+          control.valueChanges.pipe(
+            startWith(start),
+            pairwise<moment.Moment>(),
+            filter(([oldV, newV]) => !newV.isSame(oldV))
+          )
+        ),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(v => this.store.dispatch(new SetHistory("start", v)));
   }
 }

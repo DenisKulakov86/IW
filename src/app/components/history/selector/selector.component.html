@@ -5,7 +5,9 @@
     <!-- start From Date -->
     <mat-list-item (click)="pickerFrom.open()">
       <input [max]="dateTo.value" class="hidden" [formControl]="dateFrom" [matDatepicker]="pickerFrom"
-        autocomplete="off" [appConnectControl]="start$ | async" />
+        autocomplete="off" 
+        />
+        <!-- [appConnectControl]="start$ | async"  -->
       <mat-datepicker #pickerFrom touchUi [startAt]="dateFrom.value"></mat-datepicker>
       <span>{{ dateFrom.value | date: "EE, d MMM yyyy" }}</span>
     </mat-list-item>
@@ -13,7 +15,8 @@
     <!-- start To Date -->
     <mat-list-item (click)="pickerTo.open()">
       <input [min]="dateFrom.value" class="hidden" [formControl]="dateTo" [matDatepicker]="pickerTo" autocomplete="off"
-        [appConnectControl]="end$ | async" />
+      />
+      <!-- [appConnectControl]="end$ | async"  -->
       <mat-datepicker #pickerTo touchUi [startAt]="dateTo.value"></mat-datepicker>
       <span>{{ dateTo.value | date: "EE, d MMM yyyy" }}</span>
     </mat-list-item>

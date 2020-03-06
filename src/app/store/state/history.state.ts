@@ -84,7 +84,8 @@ export class HistorySatate {
       (state: HistorySatateModel): HistorySatateModel[T] => state[param]
     );
   }
-  // HistoryTable
+  
+ 
   @Selector([HistorySatate, SaleState.sales])
   static getHistory(state: HistorySatateModel, sales: Sale[]): History | any {
 
@@ -148,7 +149,6 @@ export class HistorySatate {
     { patchState, getState }: StateContext<HistorySatateModel>,
     { key, value }: SetHistory
   ) {
-    // debugger;
     const state = getState();
     let newState = {};
     newState = { ...state };
