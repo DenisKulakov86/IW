@@ -9,19 +9,27 @@ import {
 } from "@ngxs/store";
 import * as moment from "moment";
 import {
-  Param,
   SetHistory,
-  SelectPeriod,
+  SetPeriod,
   ToggleReverse,
-  SelectView
+  SetView
 } from "../actions/history.action";
-import { from, of } from "rxjs";
-import { switchMap, switchMapTo, map } from "rxjs/operators";
+import { from, of, Observable, zip } from "rxjs";
+import {
+  switchMap,
+  switchMapTo,
+  map,
+  take,
+  groupBy,
+  mergeMap,
+  reduce,
+  filter,
+  tap
+} from "rxjs/operators";
 import { SaleState } from "./sale.state";
-import { HistoryTable } from "src/app/components/history/table-history/table-history.component";
 import { Sale, Product } from "src/app/models/sale.model";
-import HistorySales from 'src/app/models/history.model';
-import * as _ from 'lodash';
+import HistorySales from "src/app/models/history.model";
+import * as _ from "lodash";
 
 export interface productHistory {
   name: string;
@@ -41,17 +49,17 @@ export interface HistorySatateModel {
   view: moment.unitOfTime.DurationConstructor;
 
   dialogPeriod: string[];
-  selectPeriod: number;
+  currentPeriod: number;
 
   dialogView: string[];
-  selectView: number;
+  currentView: number;
   reverse: boolean;
 }
 
 @State<HistorySatateModel>({
-  name: "History",
+  name: "history",
   defaults: {
-    start: moment([2020, 2, 1]),
+    start: moment().startOf("month"),
     end: moment(),
     view: "day",
     dialogPeriod: [
@@ -60,14 +68,14 @@ export interface HistorySatateModel {
       "За последный год",
       "Другое"
     ],
-    selectPeriod: 3,
+    currentPeriod: 3,
     dialogView: ["День", "Месяц", "Год"],
-    selectView: 0,
-    reverse: false
+    currentView: 0,
+    reverse: true
   }
 })
 export class HistorySatate {
-  constructor(private store: Store) { }
+  constructor(private store: Store) {}
 
   ngxsOnInit(ctx: StateContext<HistorySatateModel>) {
     // moment.locale('ru');
@@ -84,76 +92,165 @@ export class HistorySatate {
       (state: HistorySatateModel): HistorySatateModel[T] => state[param]
     );
   }
-  
- 
+
   @Selector([HistorySatate, SaleState.sales])
-  static getHistory(state: HistorySatateModel, sales: Sale[]): History | any {
+  static getHistory(state: HistorySatateModel, sales: Sale[]): HistorySales[] {
+    let start = state.start,
+      end = state.end,
+      view = state.view,
+      reverse = state.reverse;
 
-    // _.groupBy()
-    let historys = [];
-    // let date = state.start.clone();
-    // if (state.start.isAfter(state.end)) return [];
+    //** RXJS */
+    /*
+	 let startCountRXJS, endCountRXJS;
+    let historyRXJS;
+    const keySelectorByView = (s: Sale) => {
+      let strFormat =
+        view === "day" ? "D MMMM YYYY" : view == "month" ? "MMMM YYYY" : "YYYY";
+      return moment(s.timestamp)
+        .locale("ru")
+        .format(strFormat);
+    };
+    const predicatFilterSale = (s: Sale) =>
+      moment(s.timestamp).isBetween(start, end, "day", "[]");
+    startCountRXJS = Date.now();
 
-    // while (date.isSameOrBefore(state.end, state.view)) {
-    //   let sales = filter(date, state.view);
-    //   let history: HistorySales = {
-    //     date: date
-    //       .locale("ru")
-    //       .format(
-    //         state.view == "day"
-    //           ? "D MMMM YYYY"
-    //           : state.view == "month"
-    //             ? "MMMM YYYY"
-    //             : "YYYY"
-    //       ),
-    //     discount: sales.reduce((acc, s) => (acc += s.discount), 0),
-    //     products: calcProducts(sales)
-    //   };
-    //   historys.push(history);
-    //   date.add(1, state.view);
-    // }
+    interface calcProduct {
+      name: string;
+      count: number;
+      total: number;
+    }
 
+    from(
+      sales.slice().sort((a, b) =>
+        reverse
+          ? Number(a.timestamp) - Number(b.timestamp)
+          : Number(b.timestamp) - Number(a.timestamp)
+      )
+    )
+      .pipe(
+        filter(predicatFilterSale),
+        groupBy(keySelectorByView),
+        mergeMap((salesByDate$, i) => {
+          let calcDiscount$ = salesByDate$.pipe(
+            reduce((acc, s: Sale) => acc + s.discount, 0)
+          );
+          let calcProduct$ = salesByDate$.pipe(
+            reduce((acc: Product[], s: Sale) => [...acc, ...s.productList], []),
+            switchMap(pl => from(pl)),
+            groupBy(p => p.name),
+            mergeMap(products$ => {
+              let calcProduct$ = products$.pipe(
+                reduce(
+                  (acc: calcProduct, p: Product) => {
+                    acc.count += p.count;
+                    acc.total += p.count * p.price;
+                    return acc;
+                  },
+                  {
+                    name: products$.key,
+                    count: 0,
+                    total: 0
+                  }
+                )
+              );
+              return calcProduct$;
+            }),
+            reduce((acc: calcProduct[], p) => [...acc, p], [])
+          );
 
-    // function filter(
-    //   date: moment.Moment,
-    //   unit: moment.unitOfTime.DurationConstructor
-    // ): Sale[] {
-    //   return sales.filter(s => date.isSame(s.timestamp, unit));
-    // }
+          return zip(calcDiscount$, calcProduct$).pipe(
+            map(([calcDiscount, calcProduct]) => ({
+              date: salesByDate$.key,
+              discount: calcDiscount,
+              products: calcProduct
+            }))
+          );
+        }),
+        reduce((acc: any, s) => [...acc, s], [])
+      )
+      .pipe(
+        tap(s => {
+          endCountRXJS = Date.now();
+          console.log(
+            "time select historyRXJS: ",
+            endCountRXJS - startCountRXJS,
+            s
+          );
+        })
+      )
+      .subscribe(sales => (historyRXJS = sales));
+*/
+    //return historyRXJS;
 
-    // function calcProducts(sales: Sale[]): productHistory[] {
-    //   // debugger;
-    //   let res = sales
-    //     .reduce((acc, s) => [...acc, ...s.productList], [])
-    //     .reduce((acc: productHistory[], cur: Product) => {
+    //====================
 
-    //       let item = acc.find(p => p.name === cur.name);
-    //       if(item){
-    //         item.total += cur.price * cur.count
-    //         item.count += cur.count;
-    //         return acc
-    //       }
-    //       else  {
-    //         return [...acc, {name: cur.name, count: cur.count, total: cur.count * cur.price}]
-    //       }
-    //     }, [])
-    //   return res;
-    // }
+    let historys: HistorySales[];
 
-    // if (!state.reverse) historys = historys.reverse();
+    const predicat = (s: Sale) =>
+      moment(s.timestamp).isBetween(start, end, "day", "[]");
+
+    const iterateeView = (s: Sale) => {
+      let strFormat =
+        view === "day" ? "D MMMM YYYY" : view == "month" ? "MMMM YYYY" : "YYYY";
+      return moment(s.timestamp)
+        .locale("ru")
+        .format(strFormat);
+    };
+
+    let startCount, endCount;
+
+    startCount = Date.now();
+
+    const calcProductsByDate = (products:Product[]) => {
+      return _(products).reduce(
+        (acc: [number, number], p) => {
+          acc[0] += p.count;
+          acc[1] += p.count * p.price;
+          return acc;
+        },
+        [0, 0]
+      );
+    };
+
+    const calcSalesByDate = (sales:Sale[]) => {
+      return _(sales)
+        .reduce((acc, s) => acc.concat(s.productList), _<Product>([]))
+        .groupBy(p => p.name)
+        .toPairs()
+        .map(([name, products]) => {
+          let [count, total] = calcProductsByDate(products);
+          return { name, count, total };
+        })
+        .value();
+    };
+
+    historys = _(sales)
+      .filter(predicat)
+      .orderBy(["timestamp"], reverse ? "asc" : "desc")
+      .groupBy(iterateeView)
+      .toPairs()
+      .map(([date, sales]) => {
+        let discount: number = _.reduce(sales, (acc, s) => acc + s.discount, 0);
+        let calcSales = sales.length;
+        let products = calcSalesByDate(sales);
+        return { date, discount, products };
+      })
+      .value();
+
+    endCount = Date.now();
+    console.log("time select historyLodash: ", endCount - startCount);
     return historys;
   }
 
   @Action(SetHistory)
   setHistory(
-    { patchState, getState }: StateContext<HistorySatateModel>,
+    { patchState }: StateContext<HistorySatateModel>,
     { key, value }: SetHistory
   ) {
-    const state = getState();
-    let newState = {};
-    newState = { ...state };
-    newState[key] = value;
-    patchState(newState);
+    patchState({
+      [`${key}`]: value
+    });
   }
 
   @Action(ToggleReverse)
@@ -162,42 +259,42 @@ export class HistorySatate {
     patchState({ reverse: !reverse });
   }
 
-  @Action(SelectView)
+  @Action(SetView)
   selectView(
     { patchState }: StateContext<HistorySatateModel>,
-    { value }: SelectPeriod
+    { value }: SetPeriod
   ) {
     switch (value) {
       case 0:
-        patchState({ view: "day", selectView: value });
+        patchState({ view: "day", currentView: value });
         break;
       case 1:
-        patchState({ view: "month", selectView: value });
+        patchState({ view: "month", currentView: value });
         break;
       case 2:
-        patchState({ view: "year", selectView: value });
+        patchState({ view: "year", currentView: value });
         break;
     }
   }
 
-  @Action(SelectPeriod)
+  @Action(SetPeriod)
   selectPeriod(
     { patchState }: StateContext<HistorySatateModel>,
-    { value }: SelectPeriod
+    { value }: SetPeriod
   ) {
     switch (value) {
       case 0:
         patchState({
           start: moment().startOf("week"),
           end: moment(),
-          selectPeriod: value
+          currentPeriod: value
         });
         break;
       case 1:
         patchState({
           start: moment().startOf("month"),
           end: moment(),
-          selectPeriod: value
+          currentPeriod: value
         });
 
         break;
@@ -205,14 +302,14 @@ export class HistorySatate {
         patchState({
           start: moment().startOf("year"),
           end: moment(),
-          selectPeriod: value
+          currentPeriod: value
         });
         break;
       case 3:
         patchState({
-          start: moment(),
-          end: moment(),
-          selectPeriod: value
+          //  start: moment(),
+          //  end: moment(),
+          currentPeriod: value
         });
         break;
     }

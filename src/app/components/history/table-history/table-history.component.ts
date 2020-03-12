@@ -1,11 +1,5 @@
 import { Component, OnInit, Input } from "@angular/core";
-import HistorySales from 'src/app/models/history.model';
-
-export interface HistoryTable {
-  name: string;
-  count: number;
-  total: number;
-}
+import HistorySales from "src/app/models/history.model";
 
 @Component({
   selector: "app-table-history",
@@ -19,15 +13,18 @@ export class TableHistoryComponent implements OnInit {
 
   ngOnInit() {}
   getTotalCount() {
-    return this.data.products.reduce((acc, p) => (acc += p.count), 0);
+    return (
+      this.data && this.data.products.reduce((acc, p) => (acc += p.count), 0)
+    );
   }
   getTotal() {
     return (
+      this.data &&
       this.data.products.reduce((acc, p) => (acc += p.total), 0) -
-      this.data.discount
+        this.data.discount
     );
   }
-  getDiscount(){
-    return this.data.discount
+  getDiscount() {
+    return this.data && this.data.discount;
   }
 }

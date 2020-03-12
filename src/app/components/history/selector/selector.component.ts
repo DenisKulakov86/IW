@@ -15,9 +15,9 @@ import {
 import { Observable, Subject, combineLatest } from "rxjs";
 import {
   SetHistory,
-  SelectPeriod,
+  SetPeriod,
   ToggleReverse,
-  SelectView
+  SetView
 } from "src/app/store/actions/history.action";
 import * as moment from "moment";
 import {
@@ -78,8 +78,8 @@ export class SelectorComponent implements OnInit, OnDestroy {
 
     let periodAndSelect$ = combineLatest(
       this.store.select(HistorySatate.getValue("dialogPeriod")),
-      this.store.select(HistorySatate.getValue("selectPeriod"))
-    ).pipe(tap(console.log));
+      this.store.select(HistorySatate.getValue("currentPeriod"))
+    );
 
     this.showSelector$ = periodAndSelect$.pipe(
       map(([dp, sp]: [string[], number]) =>
@@ -92,7 +92,7 @@ export class SelectorComponent implements OnInit, OnDestroy {
     );
     this.view$ = combineLatest(
       this.store.select(HistorySatate.getValue("dialogView")),
-      this.store.select(HistorySatate.getValue("selectView"))
+      this.store.select(HistorySatate.getValue("currentView"))
     ).pipe(map(([dv, s]: [string[], number]) => dv[s]));
   }
   ngOnDestroy() {
@@ -108,20 +108,16 @@ export class SelectorComponent implements OnInit, OnDestroy {
           HistorySatate.getValue("dialogPeriod")
         ),
         select: this.store.selectSnapshot(
-          HistorySatate.getValue("selectPeriod")
+          HistorySatate.getValue("currentPeriod")
         )
       },
       autoFocus: false
       // hasBackdrop: false
     });
 
-    dialogRef
-      .afterClosed()
-      .toPromise()
-      .then(select => {
-        if (select === undefined) return;
-        this.store.dispatch(new SelectPeriod(select));
-      });
+    dialogRef.afterClosed().subscribe(select => {
+      !isNaN(select) && this.store.dispatch(new SetPeriod(select));
+    });
   }
 
   openDialodView() {
@@ -129,17 +125,12 @@ export class SelectorComponent implements OnInit, OnDestroy {
       minWidth: "200px",
       data: {
         period: this.store.selectSnapshot(HistorySatate.getValue("dialogView")),
-        select: this.store.selectSnapshot(HistorySatate.getValue("selectView"))
+        select: this.store.selectSnapshot(HistorySatate.getValue("currentView"))
       },
       autoFocus: false
     });
-    // instrument(dialogRef.afterClosed()).subscribe()
     dialogRef.afterClosed().subscribe(select => {
-      debugger;
-      if (!Number.isNaN(select)) {
-        return;
-      }
-      this.store.dispatch(new SelectView(select));
+      !isNaN(select) && this.store.dispatch(new SetView(select));
     });
   }
 
@@ -147,20 +138,21 @@ export class SelectorComponent implements OnInit, OnDestroy {
     this.store.dispatch(new ToggleReverse());
   }
 
-  initFrom(control: FormControl, initVal: "start" | "end") {
+  initFrom(control: FormControl, selector: "start" | "end") {
     this.store
-      .selectOnce(HistorySatate.getValue(initVal))
+      .selectOnce(HistorySatate.getValue(selector))
       .pipe(
         tap(start => control.patchValue(start)),
         switchMap(start =>
           control.valueChanges.pipe(
             startWith(start),
             pairwise<moment.Moment>(),
-            filter(([oldV, newV]) => !newV.isSame(oldV))
+            filter(([oldV, newV]) => !newV.isSame(oldV)),
+            map(([, newVal]) => newVal)
           )
         ),
         takeUntil(this.destroy$)
       )
-      .subscribe(v => this.store.dispatch(new SetHistory("start", v)));
+      .subscribe(v => this.store.dispatch(new SetHistory(selector, v)));
   }
 }

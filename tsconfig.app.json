@@ -7,7 +7,6 @@
       "gapi.auth2",
       "gapi.client.drive",
       "jasmine",
-      "_"
     ]
   },
   "files": [
