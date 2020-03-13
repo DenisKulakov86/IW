@@ -2,7 +2,6 @@ import { Component, OnInit, AfterViewInit, HostBinding, HostListener } from '@an
 import { merge, Observable } from 'rxjs';
 import { ThemeService } from './service/theme.service';
 import { Store, Select } from '@ngxs/store';
-import { GetSales } from './store/actions/sale.actions';
 import { SaleState } from './store/state/sale.state';
 import { ConfigState } from './store/state/config.state';
 

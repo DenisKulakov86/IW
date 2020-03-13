@@ -6,7 +6,8 @@ import {
   ChangeDetectionStrategy,
   AfterContentInit,
   OnChanges,
-  DoCheck
+  DoCheck,
+  SimpleChanges
 } from "@angular/core";
 import {
   Observable,
@@ -31,10 +32,12 @@ import {
   observeOn
 } from "rxjs/operators";
 import { Router } from "@angular/router";
-import { DeleteSale, GetSales } from "src/app/store/actions/sale.actions";
+import {
+  DeleteSale,
+  NewSale,
+  GetSale
+} from "src/app/store/actions/sale.actions";
 import { FormControl } from "@angular/forms";
-
-
 
 import * as moment from "moment";
 import { slide, salesListAnim } from "../animation";
@@ -45,38 +48,58 @@ import { slide, salesListAnim } from "../animation";
   styleUrls: ["./sale-list.component.scss"],
   animations: [slide, salesListAnim]
 })
-export class SaleListComponent implements OnInit, AfterViewInit {
+export class SaleListComponent implements OnInit, AfterViewInit, OnChanges {
   anim: boolean = true;
 
   @Select(SaleState.loading) loading$: Observable<boolean>;
   date: FormControl = new FormControl(moment());
   sales$: Observable<SaleList[]>;
-  isSameDate: boolean;
-  descriptionDate: string;
+
+  get runChangeDetection() {
+    console.log("Checking the view");
+    return true;
+  }
+
+  get descriptionDate() {
+    let res = !this.date.value.isSame(moment(), "day")
+      ? this.date.value.endOf("day").fromNow()
+      : "";
+    if (res !== this.olddescriptionDate) {
+      debugger;
+      console.log("compare fail", res, this.olddescriptionDate);
+    }
+    return res;
+  }
+  olddescriptionDate = !this.date.value.isSame(moment(), "day")
+    ? this.date.value.endOf("day").fromNow()
+    : "";
+
+  ngOnChanges(changes: SimpleChanges) {
+    debugger;
+    console.log("ngOnChanges", changes);
+  }
 
   constructor(
     private store: Store,
     private router: Router // public sls: StateLoadingService,
-  ) { }
+  ) {}
 
   ngOnInit() {
     moment.locale("ru");
     this.sales$ = this.date.valueChanges.pipe(
       observeOn(asapScheduler),
-      tap((d: moment.Moment) => {
-        this.isSameDate = !moment(d).isSame(moment(), "day");
-        this.descriptionDate = this.isSameDate ? moment(d).endOf("day").fromNow() : "Сегодня";
-        sessionStorage.setItem("sessionDate", d.format());
-      }),
+      tap((d: moment.Moment) =>
+        sessionStorage.setItem("sessionDate", d.format())
+      ),
       switchMap(d => this.store.select(SaleState.getSaleByDate(moment(d)))),
       map((sales: Sale[]): SaleList[] => {
-        return sales.map((s): SaleList => ({
+        return sales.map(s => ({
           id: s.id,
           total: s.productList.reduce((sum, p) => sum + p.price, 0),
           count: s.productList.length
         }));
       }),
-      tap(() => this.anim = !this.anim),
+      tap(() => (this.anim = !this.anim)),
       shareReplay(1)
     );
   }
@@ -86,14 +109,14 @@ export class SaleListComponent implements OnInit, AfterViewInit {
   }
 
   onSelect(id: any, indx: number) {
-    this.router.navigate(
-      ["/sale-detail", indx],
-      {
-        queryParams: { id }
-      });
+    this.store.dispatch(new GetSale(id, indx));
+    // this.router.navigate(["/sale-detail", indx], {
+    //   queryParams: { id }
+    // });
   }
   addSale() {
-    this.router.navigate(["/sale-detail", "newsale"]);
+    this.store.dispatch(NewSale);
+    // this.router.navigate(["/sale-detail", "newsale"]);
   }
   onDelete(s: Sale) {
     this.store.dispatch(new DeleteSale(s.id));

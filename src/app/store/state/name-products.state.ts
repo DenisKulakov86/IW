@@ -51,19 +51,10 @@ export class NameProductsSate implements NgxsOnInit {
             );
     }
 
-    // @Action(GetNameProducts)
-    // getNameProducts(ctx: StateContext<NameProductsModel>) {
-    //     return this.nameProductsService.getNames()
-    //         .pipe(
-    //             tap(({ nameProducts }) => ctx.patchState({ names: nameProducts }))
-    //         )
-    // }
     @Action(AddNameProduct)
     AddNameProduct(ctx: StateContext<NameProductsModel>, { name }: AddNameProduct) {
         this.nameProductsRef.push(name);
     }
-
-
 
     @Selector()
     static names(state: NameProductsModel) {

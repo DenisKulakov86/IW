@@ -20,7 +20,6 @@ import { HistoryComponent } from "./components/history/history.component";
 import { SaleListComponent } from "./components/sale-list/sale-list.component";
 import { OverlayContainer } from "@angular/cdk/overlay";
 import { ThemeService } from "./service/theme.service";
-import { ConnectFormGroupDirective } from "./components/sale-list/sale-detail/connect-form-group.directive";
 import { LoginComponent } from "./components/login/login.component";
 import { SaleState } from "./store/state/sale.state";
 import { environment } from "src/environments/environment";
@@ -45,6 +44,8 @@ import { AngularFireDatabaseModule } from "@angular/fire/database";
 import { AuthState } from "./store/state/auth.state";
 import { resolve } from 'url';
 import { timer } from 'rxjs';
+import { ContentViewComponent } from './components/navigation/content-view/content-view.component';
+import { RouterHandlerService } from './service/router-handler.service';
 
 //
 
@@ -66,7 +67,6 @@ export function noop() {
     SaleListComponent,
     NotFoundComponent,
     HistoryComponent,
-    ConnectFormGroupDirective,
     ConnectControlDirective,
     LoginComponent,
     SaleDetailComponent,
@@ -75,7 +75,8 @@ export function noop() {
     HistoryModalDialogComponent,
     TableHistoryComponent,
     SelectorComponent,
-    FlyDirective
+    FlyDirective,
+    ContentViewComponent
   ],
   entryComponents: [HistoryModalDialogComponent],
   imports: [
@@ -108,11 +109,10 @@ export function noop() {
         }
       }
     ),
-    // NgxsLoggerPluginModule.forRoot(),
     NgxsStoragePluginModule.forRoot({
       key: [
         ConfigState,
-        // HistorySatate, 
+        HistorySatate, 
         AuthState,
         // "sales.select"
         SaleState
@@ -127,6 +127,7 @@ export function noop() {
     {
       provide: APP_INITIALIZER,
       useFactory: noop,
+      deps:[RouterHandlerService],
       multi: true
     }],
   bootstrap: [AppComponent]

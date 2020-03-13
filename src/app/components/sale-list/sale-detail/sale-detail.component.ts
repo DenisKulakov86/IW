@@ -1,40 +1,33 @@
 import {
   Component,
   OnInit,
-  AfterViewInit,
   ViewChild,
   OnDestroy,
   ChangeDetectionStrategy,
-  HostListener,
   ElementRef,
   ChangeDetectorRef
 } from "@angular/core";
+
+import { Location } from "@angular/common";
 import { Router, ActivatedRoute } from "@angular/router";
-import { Subscription, of, iif, Observable, fromEvent } from "rxjs";
+import { Subscription, of, iif, Observable, fromEvent, Subject } from "rxjs";
 import {
   map,
-  find,
-  switchMap,
-  pairwise,
-  startWith,
-  tap,
   filter,
-  take,
   debounceTime,
   distinctUntilChanged,
   delay,
-  timeout,
-  catchError,
-  share,
-  publish,
   refCount,
-  switchAll,
   pluck,
   publishReplay,
-  takeWhile,
-  shareReplay,
   mergeMap,
-  distinct
+  takeUntil,
+  take,
+  switchMap,
+  tap,
+  mapTo,
+  catchError,
+  switchMapTo
 } from "rxjs/operators";
 import {
   FormBuilder,
@@ -43,41 +36,59 @@ import {
   FormControl,
   FormArray,
   FormGroupDirective,
-  AbstractControl
+  NgForm
 } from "@angular/forms";
 import { Store, Select } from "@ngxs/store";
 import { SaleState } from "src/app/store/state/sale.state";
-import { Sale } from "src/app/models/sale.model";
+import { Sale, Product } from "src/app/models/sale.model";
 import {
   ChangeSale,
-  DeleteSale,
-  GetSales,
   NewSale,
-  SaveSale,
-  AddSale,
-  SelectSale
+  SaveSale
+  // SelectSale
 } from "src/app/store/actions/sale.actions";
 import { MatExpansionPanel } from "@angular/material/expansion";
 import { MyErrorStateMatcher } from "../../default.error-matcher";
+import { ComponentCanDeactivate } from "src/app/guard/sale-detail.exit.guard";
+import { Title } from "@angular/platform-browser";
+import { ErrorStateMatcher } from "@angular/material/core";
 
+export class ErrorStateDiscount implements ErrorStateMatcher {
+  isErrorState(
+    control: FormControl | null,
+    form: FormGroupDirective | NgForm | null
+  ): boolean {
+    let formInvalid = !!(form && form.invalid && (form.dirty || form.touched));
+    let controlInvalid = !!(
+      control &&
+      control.invalid &&
+      (control.dirty || control.touched)
+    );
+    return formInvalid || controlInvalid;
+  }
+}
 @Component({
   selector: "app-sale-detail",
   templateUrl: "./sale-detail.component.html",
   styleUrls: ["./sale-detail.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
+export class SaleDetailComponent
+  implements OnInit, OnDestroy, ComponentCanDeactivate {
   @ViewChild("formRef", { static: false }) formRef: FormGroupDirective;
   @Select(SaleState.loading) loading$: Observable<boolean>;
 
-  title$: Observable<string>;
-  sale$: Observable<Sale>;
-  date$: Observable<number>;
+  title: string = "Новая продажа";
+  date: number;
 
   formSale: FormGroup;
   formNewProduct: FormGroup;
-  subscription: Subscription = new Subscription();
-  matcher = new MyErrorStateMatcher();
+
+  matcher = new ErrorStateDiscount();
+
+  isShodow$: Observable<boolean>;
+
+  destroy$: Subject<any> = new Subject();
 
   get discount() {
     return this.formSale.get("discount");
@@ -90,47 +101,37 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   //   console.log((this.el.nativeElement as HTMLElement ).scrollTop, e );
 
   // }
-  isShodow$: Observable<boolean>;
 
   constructor(
-    private router: Router,
     private fb: FormBuilder,
     private store: Store,
     private activeRoute: ActivatedRoute,
     private el: ElementRef,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private titleServise: Title,
+    private location: Location
+  ) {}
 
   ngOnInit() {
-    this.isShodow$ = fromEvent(document.body, "scroll").pipe(
-      map((ev: Event) => (ev.target as HTMLElement).scrollTop),
-      map(top => (top > 10 ? true : false)),
-      distinctUntilChanged()
-      // tap(console.log)
-    );
-    // .subscribe(v => console.log(v))
-
-    this.title$ = this.activeRoute.paramMap.pipe(
-      pluck("params", "id"),
-      map(id => (isNaN(+id) ? "Новая продажа" : "Продажа N " + id))
-    );
-
-    this.sale$ = this.activeRoute.queryParamMap.pipe(
-      pluck("params", "id"),
-      mergeMap(id =>
-        id === undefined
-          ? this.store.dispatch(new NewSale())
-          : this.store.dispatch(new SelectSale(id))
-      ),
-      mergeMap(() => this.store.selectOnce(SaleState.select)),
-      publishReplay(1),
-      refCount()
-    );
-    this.date$ = this.sale$.pipe(pluck("timestamp"), map(ts=> Number(ts))) ;
+    /**
+     * Set Title
+     */
+    this.activeRoute.paramMap
+      .pipe(
+        pluck("params", "id"),
+        map(id => (isNaN(+id) ? "Новая продажа" : "Продажа N " + id))
+      )
+      .subscribe(title => {
+        this.title = title;
+        this.titleServise.setTitle(title);
+      });
+    /**
+     * CREATE FORM SALE
+     */
 
     this.formSale = this.fb.group(
       {
-        discount: ["0", [Validators.min(0)]],
+        discount: ["", [Validators.min(0)]],
         productList: this.fb.array([])
       },
       {
@@ -139,25 +140,116 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     );
 
+    this.store.selectOnce(SaleState.select).subscribe(s => {
+      this.date = Number(s.timestamp);
+      let lenght = s.productList.length || 0;
+      while (lenght--) {
+        this.arrayProductControl.push(this.createFormProduct());
+      }
+      this.formSale.patchValue(s);
+    });
+
+    this.formSale.valueChanges
+      .pipe(
+        filter(_ => this.formSale.valid),
+        debounceTime(300),
+        distinctUntilChanged(
+          (v1, v2) => JSON.stringify(v1) === JSON.stringify(v2)
+        ),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(value => this.store.dispatch(new ChangeSale(value)));
+
+    /**
+     * NEW PRODUCT  FORM
+     */
     this.formNewProduct = this.createFormProduct();
 
-    this.subscription.add(
-      this.formSale.valueChanges
-        .pipe(
-          filter(_ => this.formSale.valid),
-          debounceTime(300),
-          distinctUntilChanged((v1, v2) => JSON.stringify(v1) === JSON.stringify(v2))
-        )
-        .subscribe(value => this.store.dispatch(new ChangeSale(value)))
+    /**
+     * Shodow Header
+     */
+    this.isShodow$ = fromEvent(document.body, "scroll").pipe(
+      map((ev: Event) => (ev.target as HTMLElement).scrollTop),
+      map(top => (top > 10 ? true : false)),
+      distinctUntilChanged()
     );
+
+    // this.formSale.statusChanges.subscribe(() =>
+    //   console.log(this.formSale.get("discount").errors)
+    // );
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   asyncFormValidator(control: FormControl) {
     return of({ AsyncInvalidForm: true }).pipe(delay(1000));
   }
 
-  createFormProduct(): FormGroup {
-    return this.fb.group(
+  goBack() {
+    this.location.back();
+  }
+
+  save() {
+    this.store.dispatch(new SaveSale());
+  }
+
+  add() {
+    let form = this.createFormProduct();
+    form.patchValue(this.formNewProduct.value);
+    this.arrayProductControl.push(form);
+    this.formNewProduct.reset();
+  }
+
+  delete(i: number) {
+    this.arrayProductControl.removeAt(i);
+  }
+
+  formValidator(control: FormControl) {
+    let value = control.value as Sale;
+    let discount = control.get("discount");
+
+    let diff =
+      value.productList.reduce((s, p) => (s += p.price * p.count), 0) -
+      value.discount;
+    if (diff <= 0) {
+      discount.setErrors({ invalidDiscount: true });
+      return { invalidDiscount: true };
+    }
+    discount.setErrors(null);
+    return null;
+  }
+
+  discountError() {
+    return this.discount.hasError("min")
+      ? "Скидка меньше 0"
+      : this.discount.hasError("invalidDiscount")
+      ? "Скидка больше цены"
+      : "";
+  }
+
+  onChange(control: FormControl, addVal) {
+    control.setValue(+control.value + addVal);
+    control.markAsDirty();
+  }
+
+  clearValue(control: FormControl) {
+    control.setValue(0);
+    control.markAsDirty();
+  }
+
+  exit() {
+    return this.store
+      .select(SaleState.saved)
+      .pipe(
+        map(saved => saved || confirm("Покинуть страницу без сохранения?"))
+      );
+  }
+
+  createFormProduct() {
+    let form = this.fb.group(
       {
         name: ["", [Validators.required, Validators.minLength(3)]],
         count: ["", [Validators.required, Validators.min(1)]],
@@ -167,58 +259,8 @@ export class SaleDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         validators: Validators.required
       }
     );
-  }
-  ngAfterViewInit() {
-    // this.formSale.statusChanges.subscribe(v => {
-    //   this.formSale.get('discount').markAllAsTouched();
-    // });
-  }
-  goBack() {
-    this.router.navigate(["sale-list"]);
-  }
-
-  save() {
-    this.store.dispatch(new SaveSale())
-  }
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
-  add() {
-    let form = this.createFormProduct();
-    form.patchValue(this.formNewProduct.value);
-    this.arrayProductControl.push(form);
-    this.formNewProduct.reset();
-  }
-  delete(i: number) {
-    this.arrayProductControl.removeAt(i);
-  }
-
-  formValidator(control: FormGroup) {
-    let value = control.value as Sale;
-    let discount = control.get("discount");
-
-    let diff = value.productList.reduce((s, p) => (s += p.price * p.count), 0) - value.discount;
-    if (diff <= 0) {
-      discount.setErrors({ invalidDiscount: true });
-      return { invalidDiscount: true };
-    }
-    if (discount.hasError("invalidDiscount")) discount.setErrors(null);
-    return null;
-  }
-  discountError() {
-    return this.discount.hasError("min")
-      ? "Скидка меньше 0"
-      : this.discount.hasError("invalidDiscount")
-        ? "Скидка больше цены"
-        : "";
-  }
-  onChange(control: FormControl, addVal) {
-    control.setValue(+control.value + addVal);
-    control.markAsDirty();
-  }
-  clearValue(control: FormControl) {
-    control.setValue(0);
-    control.markAsDirty();
+    //form.patchValue(product);
+    return form;
   }
 
   test(el: MatExpansionPanel) {

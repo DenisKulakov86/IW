@@ -1,8 +1,6 @@
 import { File } from "../../models/file.model";
 import { Sale, Product } from "src/app/models/sale.model";
-export class GetSales {
-  static readonly type = "[Sale] Get Sales";
-}
+
 
 export class SetSales {
   static readonly type = "[Sale] Set Sales";
@@ -14,14 +12,21 @@ export class DeleteSale {
   constructor(public id: any) {}
 }
 
-export class SelectSale {
-  static readonly type = "[Sale] Select Sale";
-  constructor(public id: any) {}
-}
+// export class SelectSale {
+//   static readonly type = "[Sale] Select Sale";
+//   constructor(public id: any) {}
+// }
 
 export class NewSale {
   static readonly type = "[Sale] New Sale";
 }
+
+export class GetSale {
+  static readonly type = "[Sale] Get Sale by ID";
+  constructor(public id: any, public indx: number) {}
+}
+
+
 
 export class SaveSale {
   static readonly type = "[Sale] Save Sale";

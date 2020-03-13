@@ -11,9 +11,7 @@ import { tap, map } from "rxjs/operators";
 import { Store } from "@ngxs/store";
 import { AuthState } from "../store/state/auth.state";
 
-@Injectable({
-  providedIn: "root"
-})
+@Injectable()
 export class AuthGuard implements CanActivate, CanActivateChild {
   constructor(private store: Store, private router: Router) {}
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {

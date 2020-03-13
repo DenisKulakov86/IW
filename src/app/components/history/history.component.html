@@ -1,18 +1,12 @@
-<button mat-raised-button (click)="stopPlay$.next()">{{text$ | async}}</button>
 
 <section class="history">
 	<app-selector></app-selector>
 	<ng-container #tableRef
 		*ngFor="let history of (historys$ | async); let i = index; let lastItem = last; trackBy: trackHistory">
-
 		<ng-container *ngIf="ngForRendered(lastItem)"> </ng-container>
-
 		<app-table-history class="history__table" @fadeIn [data]="history">
 		</app-table-history>
 	</ng-container>
-
-	<!-- <app-table-history @fadeIn *ngFor="let h of history;" [data]="h" class="history__table">
-  </app-table-history> -->
 </section>
 <!-- 
 <button mat-flat-button color="primary" (click)="textarea.value = generete()">

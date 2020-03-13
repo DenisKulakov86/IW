@@ -9,17 +9,17 @@ import {
   ofActionSuccessful
 } from "@ngxs/store";
 import { AngularFireAuth } from "@angular/fire/auth";
-import { SignIn, SignOut } from "../actions/auth.actions";
-import { from } from "rxjs";
+import { SignIn, SignOut, SignInAnonymously } from "../actions/auth.actions";
+import { from, of } from "rxjs";
 import * as firebase from "firebase/app";
 import { Router } from "@angular/router";
-import { tap } from "rxjs/operators";
-import { User, UserSateModel } from 'src/app/models/user.model';
+import { tap, catchError } from "rxjs/operators";
+import { User, UserSateModel } from "src/app/models/user.model";
 
 @State<UserSateModel>({
-  name: "user",
+  name: "auth",
   defaults: {
-    user: null,
+    user: null
   }
 })
 export class AuthState implements NgxsAfterBootstrap {
@@ -27,15 +27,11 @@ export class AuthState implements NgxsAfterBootstrap {
     private router: Router,
     private actions: Actions,
     private afAuth: AngularFireAuth
-  ) { }
-  ngxsAfterBootstrap(ctx: StateContext<UserSateModel>) { }
+  ) {}
+  ngxsAfterBootstrap(ctx: StateContext<UserSateModel>) {}
   ngxsOnInit(ctx: StateContext<UserSateModel>) {
-    this.actions
-      .pipe(ofActionDispatched(SignOut))
-      .subscribe(() => this.router.navigate(["/login"]));
-    this.actions
-      .pipe(ofActionSuccessful(SignIn))
-      .subscribe(() => this.router.navigate(["/"]));
+    // this.afAuth.authState.subscribe((user: firebase.User) => {});
+    
   }
 
   @Selector()
@@ -47,36 +43,39 @@ export class AuthState implements NgxsAfterBootstrap {
   static isSignedIn(state: UserSateModel) {
     return !!state.user;
   }
- 
 
   @Action(SignIn)
   signIn({ patchState }: StateContext<UserSateModel>) {
-    return from(this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()))
-      .pipe(tap(({ user }) => patchState({ user: this.getUserFromState(user) })))
+    return from(
+      this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    ).pipe(
+      tap(({ user }) => patchState({ user: this.getUserFromState(user) })),
+      catchError(err=> of("ooops"))
+    );
   }
 
-  // @Action(SignIn)
-  // signInAnonymously({ patchState }: StateContext<UserSateModel>) {
-  //   return from(this.afAuth.auth.signInAnonymously())
-  //     .pipe(tap(({ user }) => patchState({ user: this.getUserFromState(user) })))
-  // }
+  @Action(SignInAnonymously)
+  signInAnonymously({ patchState }: StateContext<UserSateModel>) {
+    return from(this.afAuth.auth.signInAnonymously()).pipe(
+      tap(({ user }) => patchState({ user: this.getUserFromState(user) }))
+    );
+  }
 
   @Action(SignOut)
   signOut({ patchState, setState }: StateContext<UserSateModel>) {
-    return from(this.afAuth.auth.signOut())
-      .pipe(tap(() => patchState({ user: null })))
+    return from(this.afAuth.auth.signOut()).pipe(
+      tap(() => patchState({ user: null }))
+    );
   }
   getUserFromState(user: firebase.User): User | null {
     if (user)
       return {
         uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
+        email: user.email || "anonymous@mail.com",
+        displayName: user.displayName || "Anonymous",
+        photoURL: user.photoURL || "https://via.placeholder.com/100x100?text=A",
         somethingCustom: null
-      }
-    else
-      return null;
-
+      };
+    else return null;
   }
 }

@@ -1,6 +1,7 @@
 <div class="mat-app-background">
+  <mat-progress-bar  [style.visibility]="loading? 'visible' : 'hidden'" mode="indeterminate"></mat-progress-bar>
   <div class="wrapper">
-    <div class="mat-display-4 text-primary">IW</div>
+    <div class="mat-display-4 text-accent">IW</div>
     <div class="mat-display-1">Вход</div>
     <button mat-raised-button (click)="signin()">
       <svg
@@ -32,6 +33,9 @@
         </g>
       </svg>
       Войти с помощью Google
+    </button>
+    <button color="primary" mat-button (click)="signInAnonymously()">
+      Пробная версия
     </button>
   </div>
 </div>

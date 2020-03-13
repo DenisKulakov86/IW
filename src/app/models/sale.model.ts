@@ -5,6 +5,7 @@ export interface SaleStateModel {
     error: any;
     select: Sale;
     loading: boolean;
+    saved:boolean;
   }
 
 export interface SaleList {

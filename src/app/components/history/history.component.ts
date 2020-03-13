@@ -73,7 +73,7 @@ function observer(name) {
   selector: "app-history",
   templateUrl: "./history.component.html",
   styleUrls: ["./history.component.scss"],
-   //  changeDetection: ChangeDetectionStrategy.OnPush,
+  //  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger("fadeIn", [
       transition(":enter", [
@@ -87,21 +87,11 @@ export class HistoryComponent implements OnInit, AfterViewInit {
   //   @Select(HistorySatate.getHistory)
   historys$: Observable<any>;
   destroy$: Subject<void> = new Subject();
-  @ViewChildren("tableRef") tableRef: QueryList<any>;
-
-  scroll: Observable<Event>;
-  stopPlay$: Subject<any> = new Subject();
-  text$: Observable<string> = this.stopPlay$.pipe(
-    startWith("Pause"),
-    scan((state, ev) => (state == "Pause" ? "Play" : "Pause")),
-    tap(console.log)
-  );
   stop$: Subject<any> = new Subject();
   constructor(
     private genereteService: GeneratorBase,
     private store: Store,
     private elementRef: ElementRef,
-    private render: Renderer2
   ) {}
 
   ngForRendered(last) {
@@ -112,59 +102,71 @@ export class HistoryComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    let scroll$ = fromEvent(document.body, "scroll");
+    
+  }
 
-    let more$ = scroll$.pipe(
+  ngOnInit() {
+    const scroll$ = fromEvent(document.body, "scroll");
+    const more$ = scroll$.pipe(
       throttleTime(10),
       map(ev => (<HTMLElement>ev.target).scrollTop),
       pairwise(),
       filter(([y1, y2]) => y2 > y1),
-      filter(_ => this.bottomEl <= (this.clientHeight * 1.5)),
+      filter(_ => this.bottomEl <= this.clientHeight * 1.5),
       mapTo("more")
     );
-   //  let stop$ = this.tableRef.changes.pipe(
-   //    filter(_ => this.bottomEl > this.clientHeight * 1),
-   //    mapTo("stop")
-   //  );
-    merge(more$, this.stop$).subscribe(console.log);
 
-    let historyObserable = h => {
-      return this.historyAsStream(h).pipe(
+    const historyAsStream = (history: HistorySales[]) => {
+      let initVal = 0;
+      return defer(() => {
+        return generate(
+          initVal,
+          i => i < history.length,
+          i => ++i,
+          i => {
+            initVal++;
+            return history[i];
+          },
+          animationFrameScheduler
+        );
+      });
+    };
+
+    const historyObserable = (history: HistorySales[]) => {
+      return historyAsStream(history).pipe(
         takeUntil(this.stop$),
         repeatWhen(() => more$),
         scan((acc: HistorySales[], cur) => [...acc, cur], []),
         startWith([])
       );
     };
-
-    let source$ = this.store.select(HistorySatate.getHistory);
-
-    this.historys$ = source$.pipe(
-      observeOn(asapScheduler),
+    this.historys$ = this.store.select(HistorySatate.getHistory).pipe(
+      // observeOn(asapScheduler),
       switchMap(h => historyObserable(h))
     );
-  }
 
-  ngOnInit() {}
+
+
+  }
   trackHistory(i, item: HistorySales) {
     return item.date;
   }
 
-  historyAsStream(history: HistorySales[]) {
-    let initVal = 0;
-    return defer(() => {
-      return generate(
-        initVal,
-        i => i < history.length,
-        i => ++i,
-        i => {
-          initVal++;
-          return history[i];
-        },
-        animationFrameScheduler
-      );
-    });
-  }
+  // historyAsStream(history: HistorySales[]) {
+  //   let initVal = 0;
+  //   return defer(() => {
+  //     return generate(
+  //       initVal,
+  //       i => i < history.length,
+  //       i => ++i,
+  //       i => {
+  //         initVal++;
+  //         return history[i];
+  //       },
+  //       animationFrameScheduler
+  //     );
+  //   });
+  // }
 
   get bottomEl() {
     return (<HTMLElement>this.elementRef.nativeElement).getBoundingClientRect()
@@ -172,13 +174,13 @@ export class HistoryComponent implements OnInit, AfterViewInit {
   }
   get clientHeight() {
     return document.documentElement.clientHeight;
-    return Math.max(
-      document.body.scrollHeight,
-      document.body.offsetHeight,
-      document.body.clientHeight,
-      document.documentElement.scrollHeight,
-      document.documentElement.offsetHeight,
-      document.documentElement.clientHeight
-    );
+    // return Math.max(
+    //   document.body.scrollHeight,
+    //   document.body.offsetHeight,
+    //   document.body.clientHeight,
+    //   document.documentElement.scrollHeight,
+    //   document.documentElement.offsetHeight,
+    //   document.documentElement.clientHeight
+    // );
   }
 }

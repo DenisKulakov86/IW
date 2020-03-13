@@ -100,6 +100,142 @@ export class HistorySatate {
       view = state.view,
       reverse = state.reverse;
 
+
+    let historys: HistorySales[];
+
+    const predicat = (s: Sale) =>
+      moment(s.timestamp).isBetween(start, end, "day", "[]");
+
+    const iterateeView = (s: Sale) => {
+      let strFormat =
+        view === "day" ? "D MMMM YYYY" : view == "month" ? "MMMM YYYY" : "YYYY";
+      return moment(s.timestamp)
+        .locale("ru")
+        .format(strFormat);
+    };
+
+    //let startCount, endCount;
+
+    //startCount = Date.now();
+
+    const calcProductsByDate = (products:Product[]) => {
+      return _(products).reduce(
+        (acc: [number, number], p) => {
+          acc[0] += p.count;
+          acc[1] += p.count * p.price;
+          return acc;
+        },
+        [0, 0]
+      );
+    };
+
+    const calcSalesByDate = (sales:Sale[]) => {
+      return _(sales)
+        .reduce((acc, s) => acc.concat(s.productList), _<Product>([]))
+        .groupBy(p => p.name)
+        .toPairs()
+        .map(([name, products]) => {
+          let [count, total] = calcProductsByDate(products);
+          return { name, count, total };
+        })
+        .value();
+    };
+
+    historys = _(sales)
+      .filter(predicat)
+      .orderBy(["timestamp"], reverse ? "asc" : "desc")
+      .groupBy(iterateeView)
+      .toPairs()
+      .map(([date, sales]) => {
+        let discount: number = _.reduce(sales, (acc, s) => acc + s.discount, 0);
+        let calcSales = sales.length;
+        let products = calcSalesByDate(sales);
+        return { date, discount, products };
+      })
+      .value();
+
+    //endCount = Date.now();
+    //console.log("time select historyLodash: ", endCount - startCount);
+    return historys;
+  }
+
+  @Action(SetHistory)
+  setHistory(
+    { patchState }: StateContext<HistorySatateModel>,
+    { key, value }: SetHistory
+  ) {
+    patchState({
+      [`${key}`]: value
+    });
+  }
+
+  @Action(ToggleReverse)
+  toggleReverse({ getState, patchState }: StateContext<HistorySatateModel>) {
+    let reverse = getState().reverse;
+    patchState({ reverse: !reverse });
+  }
+
+  @Action(SetView)
+  selectView(
+    { patchState }: StateContext<HistorySatateModel>,
+    { value }: SetPeriod
+  ) {
+    switch (value) {
+      case 0:
+        patchState({ view: "day", currentView: value });
+        break;
+      case 1:
+        patchState({ view: "month", currentView: value });
+        break;
+      case 2:
+        patchState({ view: "year", currentView: value });
+        break;
+    }
+  }
+
+  @Action(SetPeriod)
+  selectPeriod(
+    { patchState }: StateContext<HistorySatateModel>,
+    { value }: SetPeriod
+  ) {
+    switch (value) {
+      case 0:
+        patchState({
+          start: moment().startOf("week"),
+          end: moment(),
+          currentPeriod: value
+        });
+        break;
+      case 1:
+        patchState({
+          start: moment().startOf("month"),
+          end: moment(),
+          currentPeriod: value
+        });
+
+        break;
+      case 2:
+        patchState({
+          start: moment().startOf("year"),
+          end: moment(),
+          currentPeriod: value
+        });
+        break;
+      case 3:
+        patchState({
+          //  start: moment(),
+          //  end: moment(),
+          currentPeriod: value
+        });
+        break;
+    }
+  }
+}
+
+
+
+
+
     //** RXJS */
     /*
 	 let startCountRXJS, endCountRXJS;
@@ -184,134 +320,3 @@ export class HistorySatate {
     //return historyRXJS;
 
     //====================
-
-    let historys: HistorySales[];
-
-    const predicat = (s: Sale) =>
-      moment(s.timestamp).isBetween(start, end, "day", "[]");
-
-    const iterateeView = (s: Sale) => {
-      let strFormat =
-        view === "day" ? "D MMMM YYYY" : view == "month" ? "MMMM YYYY" : "YYYY";
-      return moment(s.timestamp)
-        .locale("ru")
-        .format(strFormat);
-    };
-
-    let startCount, endCount;
-
-    startCount = Date.now();
-
-    const calcProductsByDate = (products:Product[]) => {
-      return _(products).reduce(
-        (acc: [number, number], p) => {
-          acc[0] += p.count;
-          acc[1] += p.count * p.price;
-          return acc;
-        },
-        [0, 0]
-      );
-    };
-
-    const calcSalesByDate = (sales:Sale[]) => {
-      return _(sales)
-        .reduce((acc, s) => acc.concat(s.productList), _<Product>([]))
-        .groupBy(p => p.name)
-        .toPairs()
-        .map(([name, products]) => {
-          let [count, total] = calcProductsByDate(products);
-          return { name, count, total };
-        })
-        .value();
-    };
-
-    historys = _(sales)
-      .filter(predicat)
-      .orderBy(["timestamp"], reverse ? "asc" : "desc")
-      .groupBy(iterateeView)
-      .toPairs()
-      .map(([date, sales]) => {
-        let discount: number = _.reduce(sales, (acc, s) => acc + s.discount, 0);
-        let calcSales = sales.length;
-        let products = calcSalesByDate(sales);
-        return { date, discount, products };
-      })
-      .value();
-
-    endCount = Date.now();
-    console.log("time select historyLodash: ", endCount - startCount);
-    return historys;
-  }
-
-  @Action(SetHistory)
-  setHistory(
-    { patchState }: StateContext<HistorySatateModel>,
-    { key, value }: SetHistory
-  ) {
-    patchState({
-      [`${key}`]: value
-    });
-  }
-
-  @Action(ToggleReverse)
-  toggleReverse({ getState, patchState }: StateContext<HistorySatateModel>) {
-    let reverse = getState().reverse;
-    patchState({ reverse: !reverse });
-  }
-
-  @Action(SetView)
-  selectView(
-    { patchState }: StateContext<HistorySatateModel>,
-    { value }: SetPeriod
-  ) {
-    switch (value) {
-      case 0:
-        patchState({ view: "day", currentView: value });
-        break;
-      case 1:
-        patchState({ view: "month", currentView: value });
-        break;
-      case 2:
-        patchState({ view: "year", currentView: value });
-        break;
-    }
-  }
-
-  @Action(SetPeriod)
-  selectPeriod(
-    { patchState }: StateContext<HistorySatateModel>,
-    { value }: SetPeriod
-  ) {
-    switch (value) {
-      case 0:
-        patchState({
-          start: moment().startOf("week"),
-          end: moment(),
-          currentPeriod: value
-        });
-        break;
-      case 1:
-        patchState({
-          start: moment().startOf("month"),
-          end: moment(),
-          currentPeriod: value
-        });
-
-        break;
-      case 2:
-        patchState({
-          start: moment().startOf("year"),
-          end: moment(),
-          currentPeriod: value
-        });
-        break;
-      case 3:
-        patchState({
-          //  start: moment(),
-          //  end: moment(),
-          currentPeriod: value
-        });
-        break;
-    }
-  }
-}

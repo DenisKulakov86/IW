@@ -26,7 +26,6 @@ export class FormProductsComponent implements OnInit {
   constructor(private store: Store) {}
 
   ngOnInit() {
-    this.count.statusChanges.subscribe(console.log);
   }
   get name() {
     return this.formGroup.get("name");
@@ -43,6 +42,11 @@ export class FormProductsComponent implements OnInit {
   }
   clear(ctr: FormControl) {
     ctr.reset();
+  }
+
+  checkShowAddBtn(value:string, names:string[]){
+    return !~names.findIndex(n=> n.trim() === value.trim())
+
   }
 
   handleInput(ev: KeyboardEvent) {

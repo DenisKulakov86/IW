@@ -2,17 +2,16 @@
   <button mat-icon-button (click)="goBack()">
     <mat-icon>arrow_back</mat-icon>
   </button>
-  <span>{{ title$ | async }} </span>
-  <button (click)="save()" class="save-btn" [disabled]="formSale.invalid" mat-raised-button
-    color="primary">
+  <span>{{ title }} </span>
+  <button (click)="save()" class="save-btn" [disabled]="formSale.invalid" mat-raised-button color="primary">
     Сохранить
   </button>
 </mat-toolbar>
-<section *ngIf="!(loading$ | async); else loading" class="container-page ">
+<section *ngIf="!(loading$ | async); else loading" class="container-page">
   <!-- start Date -->
-  <h2 class="date"> {{ date$ | async | date: "EE, d MMM yyyy" }} </h2>
+  <h2 class="date"> {{ date | date: "EE, d MMM yyyy" }} </h2>
   <!-- end Date -->
-  <form class="form" [formGroup]="formSale" [appConnectFormGroup]="sale$ | async" [style.fontSize.px]="16">
+  <form class="form" [formGroup]="formSale" [style.fontSize.px]="16">
     <!-- Discount -->
     <mat-card class="form__discount">
       <mat-form-field class="form__discount-input">
@@ -105,6 +104,6 @@
 
 <ng-template #loading>
   <p class="container-page">
-    Loading...
+    Загрузка...
   </p>
 </ng-template>

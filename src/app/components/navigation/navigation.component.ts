@@ -43,7 +43,6 @@ import {
 } from "@angular/router";
 import { Title } from "@angular/platform-browser";
 import { SalesService, IUser } from "src/app/service/sales.service";
-import { GetSales } from "src/app/store/actions/sale.actions";
 import { ToggleDarkTheme, SetTheme } from "src/app/store/actions/config.action";
 import { THEME, ConfigState } from "src/app/store/state/config.state";
 import { FormControl } from "@angular/forms";
@@ -56,7 +55,7 @@ import { User } from 'src/app/models/user.model';
   selector: "app-navigation",
   templateUrl: "./navigation.component.html",
   styleUrls: ["./navigation.component.scss"],
-  animations: [slideInAnimation]
+  
 })
 export class NavigationComponent implements OnInit, OnDestroy {
   @Select(SaleState.loading) loading$: Observable<boolean>;
@@ -67,12 +66,11 @@ export class NavigationComponent implements OnInit, OnDestroy {
   greenTheme$: Observable<boolean>;
   purpleTheme$: Observable<boolean>;
   pinkTheme$: Observable<boolean>;
-  title: string;
   isDarkOrLight: FormControl = new FormControl(false);
   private destroy$ = new Subject<void>();
   links = [
-    { name: "Sale", patch: "/sale-list" },
-    { name: "History", patch: "/history" },
+    { name: "Продажи", patch: "/sale-list" },
+    { name: "История", patch: "/history" },
   ];
 
   isHandset$: Observable<boolean> = this.breakpointObserver
@@ -87,28 +85,8 @@ export class NavigationComponent implements OnInit, OnDestroy {
   constructor(
     private breakpointObserver: BreakpointObserver,
     private store: Store,
-    private router: Router,
-    private titleServise: Title,
+   
   ) {
-  }
-  setTitle(url: string) {
-    switch (url) {
-      case "/sale-list":
-        this.titleServise.setTitle("Продажи");
-        this.title = "Продажи";
-        break;
-      case "/history":
-        this.titleServise.setTitle("История");
-        this.title = "История";
-        break;
-      case "/setting":
-        this.titleServise.setTitle("Настройки");
-        this.title = "Настройки";
-        break;
-      default:
-        this.titleServise.setTitle("iw");
-        this.title = "";
-    }
   }
 
   ngOnInit() {
@@ -133,13 +111,7 @@ export class NavigationComponent implements OnInit, OnDestroy {
       )
       .subscribe(t => this.isDarkOrLight.setValue(t, { emitEvent: false }));
 
-    this.setTitle(this.router.url);
-    this.router.events
-      .pipe(
-        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(e => this.setTitle(e.url));
+  
   }
   signOut() {
     this.store.dispatch(new SignOut());
