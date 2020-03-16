@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { Store, Select } from "@ngxs/store";
-import { SignIn, SignInAnonymously } from "src/app/store/actions/auth.actions";
+import { SignIn, SignInAnonymously, SignInEmail } from "src/app/store/actions/auth.actions";
 import { AuthState } from "src/app/store/state/auth.state";
 import { Observable } from "rxjs";
-import { take } from "rxjs/operators";
+import { take, finalize } from "rxjs/operators";
 
 @Component({
   selector: "app-login",
@@ -26,5 +26,15 @@ export class LoginComponent implements OnInit {
   }
   signInAnonymously() {
     this.store.dispatch(new SignInAnonymously());
+  }
+  signInEmail(){
+    this.loading = true;
+    this.store
+      .dispatch(new SignInEmail())
+      .pipe(
+        take(1),
+        finalize(() => (this.loading = false))
+      )
+      .subscribe();
   }
 }

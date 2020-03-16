@@ -1,10 +1,10 @@
 <mat-radio-group class="radio-group">
   <mat-radio-button
-    [checked]="i == data.select"
     class="radio-button"
     *ngFor="let period of data.period; let i = index"
-    (click)="onSelect(i)"
     [value]="period"
+    [checked]="i == data.select"
+    (click)="onSelect(i)"
   >
     {{ period }}
   </mat-radio-button>

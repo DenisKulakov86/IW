@@ -9,7 +9,12 @@ import {
   ofActionSuccessful
 } from "@ngxs/store";
 import { AngularFireAuth } from "@angular/fire/auth";
-import { SignIn, SignOut, SignInAnonymously } from "../actions/auth.actions";
+import {
+  SignIn,
+  SignOut,
+  SignInAnonymously,
+  SignInEmail
+} from "../actions/auth.actions";
 import { from, of } from "rxjs";
 import * as firebase from "firebase/app";
 import { Router } from "@angular/router";
@@ -31,7 +36,6 @@ export class AuthState implements NgxsAfterBootstrap {
   ngxsAfterBootstrap(ctx: StateContext<UserSateModel>) {}
   ngxsOnInit(ctx: StateContext<UserSateModel>) {
     // this.afAuth.authState.subscribe((user: firebase.User) => {});
-    
   }
 
   @Selector()
@@ -50,13 +54,26 @@ export class AuthState implements NgxsAfterBootstrap {
       this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
     ).pipe(
       tap(({ user }) => patchState({ user: this.getUserFromState(user) })),
-      catchError(err=> of("ooops"))
+      catchError(err => of("ooops"))
     );
   }
 
   @Action(SignInAnonymously)
   signInAnonymously({ patchState }: StateContext<UserSateModel>) {
     return from(this.afAuth.auth.signInAnonymously()).pipe(
+      tap(({ user }) => patchState({ user: this.getUserFromState(user) }))
+    );
+  }
+
+  @Action(SignInEmail)
+   signInEmail({ patchState }: StateContext<UserSateModel>) {
+    // await this.afAuth.auth.createUserWithEmailAndPassword(
+    //   "user@gmai.com",
+    //   "123456"
+    // );
+    return from(
+      this.afAuth.auth.signInWithEmailAndPassword("user@gmail.com", "123456")
+    ).pipe(
       tap(({ user }) => patchState({ user: this.getUserFromState(user) }))
     );
   }

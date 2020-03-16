@@ -42,13 +42,11 @@ import {
   RouterOutlet
 } from "@angular/router";
 import { Title } from "@angular/platform-browser";
-import { SalesService, IUser } from "src/app/service/sales.service";
 import { ToggleDarkTheme, SetTheme } from "src/app/store/actions/config.action";
 import { THEME, ConfigState } from "src/app/store/state/config.state";
 import { FormControl } from "@angular/forms";
 import { slideInAnimation } from "../animation";
 import { MatSidenavContent } from "@angular/material/sidenav";
-import { FireDataBaseService } from "src/app/service/firedatabase";
 import { User } from 'src/app/models/user.model';
 
 @Component({
@@ -58,7 +56,6 @@ import { User } from 'src/app/models/user.model';
   
 })
 export class NavigationComponent implements OnInit, OnDestroy {
-  @Select(SaleState.loading) loading$: Observable<boolean>;
   @Select(SaleState.error) error$: Observable<boolean>;
   @Select(AuthState.user) user$: Observable<User>;
   @Select(ConfigState.theme) theme$: Observable<string>;

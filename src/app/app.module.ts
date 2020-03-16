@@ -34,7 +34,6 @@ import { TableHistoryComponent } from "./components/history/table-history/table-
 import { SelectorComponent } from "./components/history/selector/selector.component";
 import { FlyDirective } from "./components/fly.directive";
 import { HistorySatate } from "./store/state/history.state";
-import { ConnectControlDirective } from "./components/history/selector/connect-form-control.directive";
 
 /* Firebase services */
 import { AngularFireModule } from "@angular/fire";
@@ -46,6 +45,7 @@ import { resolve } from 'url';
 import { timer } from 'rxjs';
 import { ContentViewComponent } from './components/navigation/content-view/content-view.component';
 import { RouterHandlerService } from './service/router-handler.service';
+import { SaleDetailModalDialogComponent } from './components/sale-list/sale-detail/sale-detail-modal-dialog/sale-detail-modal-dialog.component';
 
 //
 
@@ -67,7 +67,6 @@ export function noop() {
     SaleListComponent,
     NotFoundComponent,
     HistoryComponent,
-    ConnectControlDirective,
     LoginComponent,
     SaleDetailComponent,
     SearchPipe,
@@ -76,9 +75,10 @@ export function noop() {
     TableHistoryComponent,
     SelectorComponent,
     FlyDirective,
-    ContentViewComponent
+    ContentViewComponent,
+    SaleDetailModalDialogComponent
   ],
-  entryComponents: [HistoryModalDialogComponent],
+  entryComponents: [HistoryModalDialogComponent, SaleDetailModalDialogComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -114,8 +114,8 @@ export function noop() {
         ConfigState,
         HistorySatate, 
         AuthState,
-        // "sales.select"
-        SaleState
+        "sales.select"
+        // SaleState
       ]
       // storage: StorageOption.SessionStorage
     }),

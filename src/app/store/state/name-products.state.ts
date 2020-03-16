@@ -2,7 +2,6 @@ import { State, StateContext, Store, Action, NgxsOnInit, Selector } from '@ngxs/
 import { AuthState } from './auth.state';
 import { filter, tap, map, switchMap } from 'rxjs/operators';
 import { GetNameProducts, AddNameProduct } from '../actions/name-products.action';
-import { NameProductService } from 'src/app/service/name-products.service';
 import { NameProductsModel, NameProducts } from 'src/app/models/name-products.model';
 import { AngularFireDatabase, AngularFireList } from '@angular/fire/database';
 import { empty } from 'rxjs';
@@ -23,7 +22,6 @@ export class NameProductsSate implements NgxsOnInit {
     constructor(
         private db: AngularFireDatabase,
         private store: Store,
-        private nameService: NameProductService
     ) {
 
     }

@@ -91,7 +91,7 @@ export class HistoryComponent implements OnInit, AfterViewInit {
   constructor(
     private genereteService: GeneratorBase,
     private store: Store,
-    private elementRef: ElementRef,
+    private elementRef: ElementRef
   ) {}
 
   ngForRendered(last) {
@@ -101,9 +101,7 @@ export class HistoryComponent implements OnInit, AfterViewInit {
     return false;
   }
 
-  ngAfterViewInit() {
-    
-  }
+  ngAfterViewInit() {}
 
   ngOnInit() {
     const scroll$ = fromEvent(document.body, "scroll");
@@ -144,9 +142,6 @@ export class HistoryComponent implements OnInit, AfterViewInit {
       // observeOn(asapScheduler),
       switchMap(h => historyObserable(h))
     );
-
-
-
   }
   trackHistory(i, item: HistorySales) {
     return item.date;
@@ -182,5 +177,14 @@ export class HistoryComponent implements OnInit, AfterViewInit {
     //   document.documentElement.offsetHeight,
     //   document.documentElement.clientHeight
     // );
+  }
+
+  sales;
+  generete() {
+    this.sales = this.genereteService.genereteSale(
+      new Date(2015, 0, 1),
+      new Date(2020, 11, 31)
+    );
+    return JSON.stringify(this.sales, null, 2);
   }
 }

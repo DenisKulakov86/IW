@@ -52,6 +52,8 @@ import { MyErrorStateMatcher } from "../../default.error-matcher";
 import { ComponentCanDeactivate } from "src/app/guard/sale-detail.exit.guard";
 import { Title } from "@angular/platform-browser";
 import { ErrorStateMatcher } from "@angular/material/core";
+import { MatDialog } from "@angular/material/dialog";
+import { SaleDetailModalDialogComponent } from "./sale-detail-modal-dialog/sale-detail-modal-dialog.component";
 
 export class ErrorStateDiscount implements ErrorStateMatcher {
   isErrorState(
@@ -70,13 +72,15 @@ export class ErrorStateDiscount implements ErrorStateMatcher {
 @Component({
   selector: "app-sale-detail",
   templateUrl: "./sale-detail.component.html",
-  styleUrls: ["./sale-detail.component.scss"],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ["./sale-detail.component.scss"]
+  // changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SaleDetailComponent
   implements OnInit, OnDestroy, ComponentCanDeactivate {
   @ViewChild("formRef", { static: false }) formRef: FormGroupDirective;
   @Select(SaleState.loading) loading$: Observable<boolean>;
+  @Select(SaleState.saved) saved$: Observable<boolean>;
+  // saved: boolean;
 
   title: string = "Новая продажа";
   date: number;
@@ -109,7 +113,9 @@ export class SaleDetailComponent
     private el: ElementRef,
     private cdr: ChangeDetectorRef,
     private titleServise: Title,
-    private location: Location
+    private location: Location,
+    public dialog: MatDialog,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -173,10 +179,9 @@ export class SaleDetailComponent
       map(top => (top > 10 ? true : false)),
       distinctUntilChanged()
     );
-
-    // this.formSale.statusChanges.subscribe(() =>
-    //   console.log(this.formSale.get("discount").errors)
-    // );
+    /**
+     *
+     */
   }
 
   ngOnDestroy() {
@@ -189,11 +194,11 @@ export class SaleDetailComponent
   }
 
   goBack() {
-    this.location.back();
+    this.router.navigate(["/sale-list"]);
   }
 
   save() {
-    this.store.dispatch(new SaveSale());
+    return this.store.dispatch(new SaveSale());
   }
 
   add() {
@@ -241,11 +246,30 @@ export class SaleDetailComponent
   }
 
   exit() {
-    return this.store
-      .select(SaleState.saved)
-      .pipe(
-        map(saved => saved || confirm("Покинуть страницу без сохранения?"))
+    if (this.formSale.invalid && this.formSale.dirty) {
+      let dialogRef = this.dialog.open(SaleDetailModalDialogComponent, {
+        minWidth: "200px",
+        data: "Данны не верны. Выход будет без сохранения!",
+        panelClass: "no-padding"
+      });
+      return dialogRef.afterClosed();
+    }
+
+    let saved = this.store.selectSnapshot(SaleState.saved);
+    if (!saved) {
+      let dialogRef = this.dialog.open(SaleDetailModalDialogComponent, {
+        minWidth: "200px",
+        data: "Сохранить изменения?",
+        panelClass: "no-padding"
+      });
+      return dialogRef.afterClosed().pipe(
+        switchMap(result => {
+          return result ? this.save().pipe(mapTo(true)) : of(true);
+        })
       );
+    } else {
+      return true;
+    }
   }
 
   createFormProduct() {

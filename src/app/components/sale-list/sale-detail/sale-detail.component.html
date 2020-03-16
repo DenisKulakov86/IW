@@ -3,11 +3,11 @@
     <mat-icon>arrow_back</mat-icon>
   </button>
   <span>{{ title }} </span>
-  <button (click)="save()" class="save-btn" [disabled]="formSale.invalid" mat-raised-button color="primary">
+  <button (click)="save()" class="save-btn" [disabled]="formSale.invalid || (saved$ | async)" mat-raised-button color="primary">
     Сохранить
   </button>
 </mat-toolbar>
-<section *ngIf="!(loading$ | async); else loading" class="container-page">
+<section *ngIf="!(loading$ | async) else loading" class="container-page">
   <!-- start Date -->
   <h2 class="date"> {{ date | date: "EE, d MMM yyyy" }} </h2>
   <!-- end Date -->

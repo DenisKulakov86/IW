@@ -6,7 +6,8 @@ import { merge } from "rxjs";
 import {
   SignOut,
   SignIn,
-  SignInAnonymously
+  SignInAnonymously,
+  SignInEmail
 } from "../store/actions/auth.actions";
 
 @Injectable({
@@ -36,6 +37,10 @@ export class RouterHandlerService {
 
     this.actions$
       .pipe(ofActionSuccessful(SignInAnonymously))
+      .subscribe(() => this.router.navigate(["/"]));
+
+    this.actions$
+      .pipe(ofActionSuccessful(SignInEmail))
       .subscribe(() => this.router.navigate(["/"]));
   }
 }

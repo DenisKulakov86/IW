@@ -7,7 +7,8 @@ import {
   AfterContentInit,
   OnChanges,
   DoCheck,
-  SimpleChanges
+  SimpleChanges,
+  ApplicationRef
 } from "@angular/core";
 import {
   Observable,
@@ -48,7 +49,7 @@ import { slide, salesListAnim } from "../animation";
   styleUrls: ["./sale-list.component.scss"],
   animations: [slide, salesListAnim]
 })
-export class SaleListComponent implements OnInit, AfterViewInit, OnChanges {
+export class SaleListComponent implements OnInit, AfterViewInit {
   anim: boolean = true;
 
   @Select(SaleState.loading) loading$: Observable<boolean>;
@@ -60,24 +61,7 @@ export class SaleListComponent implements OnInit, AfterViewInit, OnChanges {
     return true;
   }
 
-  get descriptionDate() {
-    let res = !this.date.value.isSame(moment(), "day")
-      ? this.date.value.endOf("day").fromNow()
-      : "";
-    if (res !== this.olddescriptionDate) {
-      debugger;
-      console.log("compare fail", res, this.olddescriptionDate);
-    }
-    return res;
-  }
-  olddescriptionDate = !this.date.value.isSame(moment(), "day")
-    ? this.date.value.endOf("day").fromNow()
-    : "";
-
-  ngOnChanges(changes: SimpleChanges) {
-    debugger;
-    console.log("ngOnChanges", changes);
-  }
+  descriptionDate: string = "";
 
   constructor(
     private store: Store,
@@ -88,9 +72,12 @@ export class SaleListComponent implements OnInit, AfterViewInit, OnChanges {
     moment.locale("ru");
     this.sales$ = this.date.valueChanges.pipe(
       observeOn(asapScheduler),
-      tap((d: moment.Moment) =>
-        sessionStorage.setItem("sessionDate", d.format())
-      ),
+      tap((d: moment.Moment) => {
+        this.descriptionDate = !this.date.value.isSame(moment(), "day")
+          ? this.date.value.endOf("day").fromNow()
+          : "";
+        sessionStorage.setItem("sessionDate", d.format());
+      }),
       switchMap(d => this.store.select(SaleState.getSaleByDate(moment(d)))),
       map((sales: Sale[]): SaleList[] => {
         return sales.map(s => ({

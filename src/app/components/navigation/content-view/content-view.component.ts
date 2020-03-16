@@ -2,8 +2,10 @@ import { Component, OnInit } from "@angular/core";
 import { RouterOutlet, Router, NavigationEnd } from "@angular/router";
 import { Title } from "@angular/platform-browser";
 import { filter, takeUntil } from "rxjs/operators";
-import { Subject } from "rxjs";
+import { Subject, Observable } from "rxjs";
 import { slideInAnimation } from "../../animation";
+import { SaleState } from 'src/app/store/state/sale.state';
+import { Select } from '@ngxs/store';
 
 @Component({
   selector: "app-content-view",
@@ -13,6 +15,8 @@ import { slideInAnimation } from "../../animation";
 })
 export class ContentViewComponent implements OnInit {
   title: string;
+  @Select(SaleState.loading) loading$: Observable<boolean>;
+
   private destroy$ = new Subject<void>();
 
   constructor(private titleServise: Title, private router: Router) {}

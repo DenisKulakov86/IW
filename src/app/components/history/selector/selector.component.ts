@@ -140,17 +140,17 @@ export class SelectorComponent implements OnInit, OnDestroy {
 
   initFrom(control: FormControl, selector: "start" | "end") {
     this.store
-      .selectOnce(HistorySatate.getValue(selector))
+      .select(HistorySatate.getValue(selector))
       .pipe(
-        tap(start => control.patchValue(start)),
-        switchMap(start =>
-          control.valueChanges.pipe(
+        switchMap(start => {
+          control.patchValue(start);
+          return control.valueChanges.pipe(
             startWith(start),
             pairwise<moment.Moment>(),
             filter(([oldV, newV]) => !newV.isSame(oldV)),
             map(([, newVal]) => newVal)
-          )
-        ),
+          );
+        }),
         takeUntil(this.destroy$)
       )
       .subscribe(v => this.store.dispatch(new SetHistory(selector, v)));

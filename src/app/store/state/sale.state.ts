@@ -39,7 +39,6 @@ import {
   SaveSale,
   AddSale,
   SetSales,
-  // SelectSale,
   UpdateSale,
   GetSale
 } from "../actions/sale.actions";
@@ -51,6 +50,11 @@ import {
   SnapshotAction
 } from "@angular/fire/database";
 import { AngularFireAuth } from "@angular/fire/auth";
+import {
+  GeneratorBase,
+  namesProduct
+} from "src/app/service/generator-sale.service";
+import { AddNameProduct } from "../actions/name-products.action";
 
 function saveSales(ctx: StateContext<SaleStateModel>) {
   let sales = ctx.getState().sales;
@@ -77,12 +81,16 @@ function insertOrUpdateSale(id: any, loadedSale?: Sale) {
 })
 export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
   saleRef: AngularFireList<Sale>;
-  constructor(private db: AngularFireDatabase, private store: Store) {}
+  constructor(
+    private db: AngularFireDatabase,
+    private store: Store,
+    private generate: GeneratorBase
+  ) {}
   ngxsOnInit(ctx: StateContext<SaleStateModel>) {
     let salesRef$ = this.store
       .select(AuthState.user)
       .pipe(
-        map(user => (user ? this.db.list<Sale>(`${user.uid}/sale`) : null))
+        map(user => (user ? this.db.list<Sale>(`${user.uid}/sales`) : null))
       );
 
     salesRef$.subscribe(ref => (this.saleRef = ref));
@@ -129,7 +137,19 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
   }
 
   @Action(NewSale)
-  newSale(ctx: StateContext<SaleStateModel>) {
+  async newSale(ctx: StateContext<SaleStateModel>) {
+    // namesProduct.forEach(n=> this.store.dispatch(new AddNameProduct(n)))
+    // let { sales } = this.generate.genereteSale(
+    //   new Date(2019, 0, 1),
+    //   new Date(2020, 11, 31)
+    // );
+    // for(let s of sales){
+    //  await this.saleRef.push(s);
+    //  console.log("sale write", moment(s.timestamp).format("DD-MM-YYYY"));
+    // }
+    //this.saleRef.remove();
+    // return;
+
     ctx.patchState({
       select: {
         discount: 0,
@@ -201,7 +221,7 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
   }
 
   /**
-   * Selectors 
+   * Selectors
    */
 
   @Selector()

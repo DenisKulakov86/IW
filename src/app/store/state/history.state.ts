@@ -59,7 +59,8 @@ export interface HistorySatateModel {
 @State<HistorySatateModel>({
   name: "history",
   defaults: {
-    start: moment().startOf("month"),
+    start: moment(),
+    //.startOf("month"),
     end: moment(),
     view: "day",
     dialogPeriod: [
@@ -100,7 +101,6 @@ export class HistorySatate {
       view = state.view,
       reverse = state.reverse;
 
-
     let historys: HistorySales[];
 
     const predicat = (s: Sale) =>
@@ -118,7 +118,7 @@ export class HistorySatate {
 
     //startCount = Date.now();
 
-    const calcProductsByDate = (products:Product[]) => {
+    const calcProductsByDate = (products: Product[]) => {
       return _(products).reduce(
         (acc: [number, number], p) => {
           acc[0] += p.count;
@@ -129,7 +129,7 @@ export class HistorySatate {
       );
     };
 
-    const calcSalesByDate = (sales:Sale[]) => {
+    const calcSalesByDate = (sales: Sale[]) => {
       return _(sales)
         .reduce((acc, s) => acc.concat(s.productList), _<Product>([]))
         .groupBy(p => p.name)
@@ -223,8 +223,8 @@ export class HistorySatate {
         break;
       case 3:
         patchState({
-          //  start: moment(),
-          //  end: moment(),
+          start: moment(),
+          end: moment(),
           currentPeriod: value
         });
         break;
@@ -232,12 +232,8 @@ export class HistorySatate {
   }
 }
 
-
-
-
-
-    //** RXJS */
-    /*
+//** RXJS */
+/*
 	 let startCountRXJS, endCountRXJS;
     let historyRXJS;
     const keySelectorByView = (s: Sale) => {
@@ -317,6 +313,6 @@ export class HistorySatate {
       )
       .subscribe(sales => (historyRXJS = sales));
 */
-    //return historyRXJS;
+//return historyRXJS;
 
-    //====================
+//====================
