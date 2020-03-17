@@ -72,7 +72,7 @@ export interface HistorySatateModel {
     currentPeriod: 3,
     dialogView: ["День", "Месяц", "Год"],
     currentView: 0,
-    reverse: true
+    reverse: false
   }
 })
 export class HistorySatate {
@@ -143,10 +143,11 @@ export class HistorySatate {
 
     historys = _(sales)
       .filter(predicat)
-      .orderBy(["timestamp"], reverse ? "asc" : "desc")
+      .orderBy(["timestamp"], "asc")
       .groupBy(iterateeView)
       .toPairs()
       .map(([date, sales]) => {
+        // debugger;
         let discount: number = _.reduce(sales, (acc, s) => acc + s.discount, 0);
         let calcSales = sales.length;
         let products = calcSalesByDate(sales);
@@ -156,7 +157,7 @@ export class HistorySatate {
 
     //endCount = Date.now();
     //console.log("time select historyLodash: ", endCount - startCount);
-    return historys;
+    return reverse ? historys.reverse() : historys;
   }
 
   @Action(SetHistory)

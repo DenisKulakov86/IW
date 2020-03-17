@@ -16,6 +16,8 @@ import { Select } from '@ngxs/store';
 export class ContentViewComponent implements OnInit {
   title: string;
   @Select(SaleState.loading) loading$: Observable<boolean>;
+  @Select(SaleState.error) error$: Observable<boolean>;
+
 
   private destroy$ = new Subject<void>();
 

@@ -29,7 +29,8 @@ import {
   take,
   retry,
   delay,
-  switchMapTo
+  switchMapTo,
+  skip
 } from "rxjs/operators";
 import { AuthState } from "./auth.state";
 import {
@@ -97,22 +98,20 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
 
     salesRef$
       .pipe(
-        switchMap(ref => {
-          if (ref) {
-            ctx.patchState({ loading: true });
-            return ref.snapshotChanges();
-          } else {
-            return empty();
-          }
-        }),
+        // tap(() => ctx.patchState({ loading: true })),
+        switchMap(ref => (ref ? ref.snapshotChanges() : empty())),
         map(change =>
           change.map((c): Sale => ({ ...c.payload.val(), id: c.key }))
-        )
-        // switchMap(() => throwError("something Error"))
+        ),
+        // switchMap(() => throwError("something Error")),
+        tap(
+          () => ctx.patchState({ loading: false, error: null }),
+          error => ctx.patchState({ loading: false, error })
+        ),
       )
       .subscribe(
-        sales => ctx.dispatch(new SetSales(sales)),
-        error => ctx.patchState({ error, loading: false })
+        sales => ctx.dispatch(new SetSales(sales))
+        // error => ctx.patchState({ error, loading: false })
       );
   }
 
@@ -120,15 +119,8 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
 
   @Action(SetSales)
   setSales(ctx: StateContext<SaleStateModel>, { sales }: SetSales) {
-    ctx.patchState({ sales, loading: false, error: null });
+    ctx.patchState({ sales });
   }
-
-  // @Action(SelectSale)
-  // getSales(ctx: StateContext<SaleStateModel>, { id }: SelectSale) {
-  //   let sales = ctx.getState().sales;
-  //   let select = sales.find(s => s.id === id);
-  //   ctx.patchState({ select, saved: true });
-  // }
 
   @Action(DeleteSale)
   deleteSale(ctx: StateContext<SaleStateModel>, { id }: DeleteSale) {

@@ -135,7 +135,8 @@ export class HistoryComponent implements OnInit, AfterViewInit {
         takeUntil(this.stop$),
         repeatWhen(() => more$),
         scan((acc: HistorySales[], cur) => [...acc, cur], []),
-        startWith([])
+        startWith([]),
+        tap(console.log)
       );
     };
     this.historys$ = this.store.select(HistorySatate.getHistory).pipe(

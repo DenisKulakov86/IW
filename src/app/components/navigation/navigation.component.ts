@@ -6,10 +6,11 @@ import {
   AfterContentInit,
   OnDestroy,
   ElementRef,
-  ViewChild
+  ViewChild,
+  Injectable
 } from "@angular/core";
 import { BreakpointObserver, Breakpoints } from "@angular/cdk/layout";
-import { Observable, Subject, pipe, fromEvent } from "rxjs";
+import { Observable, Subject, pipe, fromEvent, ReplaySubject } from "rxjs";
 import {
   map,
   shareReplay,
@@ -47,16 +48,14 @@ import { THEME, ConfigState } from "src/app/store/state/config.state";
 import { FormControl } from "@angular/forms";
 import { slideInAnimation } from "../animation";
 import { MatSidenavContent } from "@angular/material/sidenav";
-import { User } from 'src/app/models/user.model';
+import { User } from "src/app/models/user.model";
 
 @Component({
   selector: "app-navigation",
   templateUrl: "./navigation.component.html",
-  styleUrls: ["./navigation.component.scss"],
-  
+  styleUrls: ["./navigation.component.scss"]
 })
 export class NavigationComponent implements OnInit, OnDestroy {
-  @Select(SaleState.error) error$: Observable<boolean>;
   @Select(AuthState.user) user$: Observable<User>;
   @Select(ConfigState.theme) theme$: Observable<string>;
   defTheme$: Observable<boolean>;
@@ -67,7 +66,7 @@ export class NavigationComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   links = [
     { name: "Продажи", patch: "/sale-list" },
-    { name: "История", patch: "/history" },
+    { name: "История", patch: "/history" }
   ];
 
   isHandset$: Observable<boolean> = this.breakpointObserver
@@ -81,13 +80,11 @@ export class NavigationComponent implements OnInit, OnDestroy {
 
   constructor(
     private breakpointObserver: BreakpointObserver,
-    private store: Store,
-   
-  ) {
-  }
+    private store: Store
+  ) {}
 
   ngOnInit() {
-    let theme = this.theme$.pipe(map(t => t.split(" ")[1]))
+    let theme = this.theme$.pipe(map(t => t.split(" ")[1]));
     this.defTheme$ = theme.pipe(map(t => t === THEME.indigo));
     this.greenTheme$ = theme.pipe(map(t => t === THEME.green));
     this.purpleTheme$ = theme.pipe(map(t => t === THEME.deepPpurple));
@@ -107,8 +104,6 @@ export class NavigationComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe(t => this.isDarkOrLight.setValue(t, { emitEvent: false }));
-
-  
   }
   signOut() {
     this.store.dispatch(new SignOut());

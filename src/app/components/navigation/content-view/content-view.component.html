@@ -1,23 +1,25 @@
 <mat-toolbar>
     <span>{{ title }}</span>
 </mat-toolbar>
-<ng-container *ngIf="!(loading$ | async); else loading">
-    <ng-container *ngIf="!(error$ | async); else retry">
-        <div class="mat-typography container-page" [@routeAnimations]="prepareRoute(outlet)">
-            <router-outlet #outlet="outlet"></router-outlet>
-        </div>
+<div [@routeAnimations]="prepareRoute(outlet)" class="content">
+    <ng-container *ngIf="!(loading$ | async); else loading">
+        <ng-container *ngIf="!(error$ | async); else retry">
+            <div class="content__inner">
+                <router-outlet #outlet="outlet"></router-outlet>
+            </div>
+        </ng-container>
     </ng-container>
-</ng-container>
-<ng-template #loading>
-    <p>
-        Loading...
-    </p>
-</ng-template>
-<ng-template #retry>
-    <div class="center-page">
-        <h1 class="text-accent">Ошибка загрузки данный</h1>
-        <!-- <button type="button" mat-button (click)="getSales()">
+    <ng-template #loading>
+        <p>
+            Загрузка...
+        </p>
+    </ng-template>
+    <ng-template #retry>
+        <div class="center-page">
+            <h1 class="text-accent">Ошибка загрузки данный</h1>
+            <!-- <button type="button" mat-button (click)="getSales()">
             Повторить
           </button> -->
-    </div>
-</ng-template>
+        </div>
+    </ng-template>
+</div>

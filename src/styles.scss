@@ -43,13 +43,6 @@ html {
   box-sizing: border-box;
 }
 
-.container-page {
-  display: block;
-  padding: 15px 5px 30px;
-  position: relative;
-}
-
-
 *,
 *::before,
 *::after {
@@ -65,13 +58,10 @@ body {
   background-color: #e7ebf0;
 }
 
-body{
-  position: relative;
-}
+
 
 ul {
   list-style: none;
-  // margin-left: 16px;
   padding: 0;
 }
 
@@ -79,8 +69,15 @@ ul {
   max-width: 960px;
   min-height: 100%;
   margin: 0 auto;
-  // overflow-x: hidden;
-  // position: relative;
+}
+
+.center-page {
+  text-align: center;
+  position: absolute;
+  white-space: nowrap;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 .btn-fly.mat-fab {
   position: fixed ;
