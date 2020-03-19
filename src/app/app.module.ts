@@ -114,8 +114,8 @@ export function noop() {
         ConfigState,
         HistorySatate, 
         AuthState,
-        // "sales.select"
-        SaleState
+        "sales.select"
+        // SaleState
       ]
       // storage: StorageOption.SessionStorage
     }),

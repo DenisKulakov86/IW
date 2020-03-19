@@ -98,7 +98,7 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
 
     salesRef$
       .pipe(
-        // tap(() => ctx.patchState({ loading: true })),
+        tap(() => ctx.patchState({ loading: true })),
         switchMap(ref => (ref ? ref.snapshotChanges() : empty())),
         map(change =>
           change.map((c): Sale => ({ ...c.payload.val(), id: c.key }))
@@ -110,8 +110,8 @@ export class SaleState implements NgxsOnInit, NgxsAfterBootstrap {
         ),
       )
       .subscribe(
-        sales => ctx.dispatch(new SetSales(sales))
-        // error => ctx.patchState({ error, loading: false })
+        sales => ctx.dispatch(new SetSales(sales)),
+        error => ctx.patchState({ error, loading: false })
       );
   }
 

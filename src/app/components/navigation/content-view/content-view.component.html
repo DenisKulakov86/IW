@@ -1,6 +1,9 @@
 <mat-toolbar>
     <span>{{ title }}</span>
 </mat-toolbar>
+
+
+
 <div [@routeAnimations]="prepareRoute(outlet)" class="content">
     <ng-container *ngIf="!(loading$ | async); else loading">
         <ng-container *ngIf="!(error$ | async); else retry">
@@ -9,11 +12,13 @@
             </div>
         </ng-container>
     </ng-container>
+
     <ng-template #loading>
-        <p>
-            Загрузка...
-        </p>
+        <div class="overlay mat-app-background">
+            <mat-spinner class="spinner" diameter="200"> </mat-spinner>
+        </div>
     </ng-template>
+
     <ng-template #retry>
         <div class="center-page">
             <h1 class="text-accent">Ошибка загрузки данный</h1>

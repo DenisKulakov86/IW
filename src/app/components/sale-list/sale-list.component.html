@@ -7,14 +7,17 @@
         <p *ngIf="!descriptionDate" class="date-description">Сегодня</p>
     </div>
 
+    
+
     <mat-action-list [@salesListAnim]="anim? true : false">
-        <mat-list-item matLine (click)="onSelect(s.id, i + 1)" *ngFor=" let s of (sales$ | async); let i = index">
+        <mat-list-item (click)="onSelect(s.id, i + 1)" *ngFor=" let s of (sales$ | async); let i = index">
+
             <div class="sale text-primary">
                 <div> {{i + 1}} </div>
                 <div> {{s.count}} поз. </div>
                 <div> {{s.total | currency:'RUB':'symbol-narrow'}} </div>
             </div>
-            <button (click)="$event.stopPropagation()" class="icon-more-vert" mat-icon-button
+            <button mat-icon-button (mousedown)="$event.stopPropagation()" (click)="$event.stopPropagation()"
                 [matMenuTriggerFor]="menu">
                 <mat-icon class="text-primary">more_vert</mat-icon>
             </button>
@@ -25,6 +28,8 @@
         </mat-list-item>
 
     </mat-action-list>
+
+
 
 
 
