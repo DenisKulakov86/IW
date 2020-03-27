@@ -1,4 +1,4 @@
-import { HistorySatateModel } from '../state/history.state';
+import { HistorySatateModel } from 'src/app/models/history.model';
 
 export class SetHistory<T = HistorySatateModel> {
   static readonly type = "[History] Set History";

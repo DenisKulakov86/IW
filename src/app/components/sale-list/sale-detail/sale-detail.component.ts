@@ -53,7 +53,7 @@ import { ComponentCanDeactivate } from "src/app/guard/sale-detail.exit.guard";
 import { Title } from "@angular/platform-browser";
 import { ErrorStateMatcher } from "@angular/material/core";
 import { MatDialog } from "@angular/material/dialog";
-import { SaleDetailModalDialogComponent } from "./sale-detail-modal-dialog/sale-detail-modal-dialog.component";
+import { SaleDetailModalDialogComponent } from "./sale-detail-modal-dialog.component";
 
 export class ErrorStateDiscount implements ErrorStateMatcher {
   isErrorState(

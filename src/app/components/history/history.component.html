@@ -3,7 +3,7 @@
 	<ng-container
 		*ngFor="let history of (historys$ | async); let i = index; let lastItem = last; trackBy: trackHistory">
 		<ng-container *ngIf="ngForRendered(lastItem)"> </ng-container>
-		<app-table-history class="history__table" @fadeIn [data]="history">
+		<app-table-history class="table" @fadeIn [data]="history">
 		</app-table-history>
 	</ng-container>
 </section>

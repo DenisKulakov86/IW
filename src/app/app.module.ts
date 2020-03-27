@@ -29,7 +29,7 @@ import { SearchPipe } from "./components/sale-list/form-products/search.pipe";
 import { FormProductsComponent } from "./components/sale-list/form-products/form-products.component";
 import { NameProductsSate } from "./store/state/name-products.state";
 import { ConfigState } from "./store/state/config.state";
-import { HistoryModalDialogComponent } from "./components/history/history-modal-dialog/history-modal-dialog.component";
+import { HistoryModalDialogComponent } from "./components/history/selector/history-modal-dialog.component";
 import { TableHistoryComponent } from "./components/history/table-history/table-history.component";
 import { SelectorComponent } from "./components/history/selector/selector.component";
 import { FlyDirective } from "./components/fly.directive";
@@ -45,7 +45,7 @@ import { resolve } from 'url';
 import { timer } from 'rxjs';
 import { ContentViewComponent } from './components/navigation/content-view/content-view.component';
 import { RouterHandlerService } from './service/router-handler.service';
-import { SaleDetailModalDialogComponent } from './components/sale-list/sale-detail/sale-detail-modal-dialog/sale-detail-modal-dialog.component';
+import { SaleDetailModalDialogComponent } from './components/sale-list/sale-detail/sale-detail-modal-dialog.component';
 
 //
 

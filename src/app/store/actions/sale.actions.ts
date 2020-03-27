@@ -1,4 +1,3 @@
-import { File } from "../../models/file.model";
 import { Sale, Product } from "src/app/models/sale.model";
 
 

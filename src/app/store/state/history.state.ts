@@ -28,33 +28,8 @@ import {
 } from "rxjs/operators";
 import { SaleState } from "./sale.state";
 import { Sale, Product } from "src/app/models/sale.model";
-import HistorySales from "src/app/models/history.model";
+import HistorySales, { HistorySatateModel, ProductHistory } from "src/app/models/history.model";
 import * as _ from "lodash";
-
-export interface productHistory {
-  name: string;
-  count: number;
-  total: number;
-}
-
-// export interface HistorySale {
-//   title: string;
-//   discount: number;
-//   products: productHistory[];
-// }
-
-export interface HistorySatateModel {
-  start: moment.Moment;
-  end: moment.Moment;
-  view: moment.unitOfTime.DurationConstructor;
-
-  dialogPeriod: string[];
-  currentPeriod: number;
-
-  dialogView: string[];
-  currentView: number;
-  reverse: boolean;
-}
 
 @State<HistorySatateModel>({
   name: "history",
@@ -129,7 +104,7 @@ export class HistorySatate {
       );
     };
 
-    const calcSalesByDate = (sales: Sale[]) => {
+    const calcSalesByDate = (sales: Sale[]):ProductHistory[] => {
       return _(sales)
         .reduce((acc, s) => acc.concat(s.productList), _<Product>([]))
         .groupBy(p => p.name)
@@ -166,7 +141,7 @@ export class HistorySatate {
     { key, value }: SetHistory
   ) {
     patchState({
-      [`${key}`]: value
+      [String(key)]: value
     });
   }
 

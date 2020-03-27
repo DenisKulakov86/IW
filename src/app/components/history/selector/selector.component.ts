@@ -6,11 +6,10 @@ import {
 } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
-import { HistoryModalDialogComponent } from "../history-modal-dialog/history-modal-dialog.component";
+import { HistoryModalDialogComponent } from "./history-modal-dialog.component";
 import { Store, Select, Selector } from "@ngxs/store";
 import {
   HistorySatate,
-  HistorySatateModel
 } from "src/app/store/state/history.state";
 import { Observable, Subject, combineLatest } from "rxjs";
 import {
