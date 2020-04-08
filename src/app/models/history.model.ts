@@ -23,6 +23,7 @@ export interface ProductHistory {
 export default interface HistorySales {
     date: string;
     discount: number;
+    numSales:number;
     products: {
       name: string;
       count: number;

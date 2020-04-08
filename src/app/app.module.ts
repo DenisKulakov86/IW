@@ -46,6 +46,7 @@ import { timer } from 'rxjs';
 import { ContentViewComponent } from './components/navigation/content-view/content-view.component';
 import { RouterHandlerService } from './service/router-handler.service';
 import { SaleDetailModalDialogComponent } from './components/sale-list/sale-detail/sale-detail-modal-dialog.component';
+import { ForecastComponent } from './components/forecast/forecast.component';
 
 //
 
@@ -76,7 +77,8 @@ export function noop() {
     SelectorComponent,
     FlyDirective,
     ContentViewComponent,
-    SaleDetailModalDialogComponent
+    SaleDetailModalDialogComponent,
+    ForecastComponent
   ],
   entryComponents: [HistoryModalDialogComponent, SaleDetailModalDialogComponent],
   imports: [

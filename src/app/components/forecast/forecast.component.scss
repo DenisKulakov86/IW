@@ -1,0 +1,25 @@
+// :host{
+//     display: block;
+//     height: 100%;
+// }
+.date{
+    padding-top: 32px;
+    text-align: center;
+    font-size: 30px;
+    line-height: 32px;
+}
+.row{
+    // height: 100%;
+    display: flex;
+    padding-top: 48px;
+    justify-content: space-around;
+}
+.mat-icon{
+    vertical-align: bottom;
+}
+.col{
+    text-align: center;
+    font-size: 42px;
+    line-height: 45px;
+    white-space: nowrap;
+}

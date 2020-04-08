@@ -28,7 +28,10 @@ import {
 } from "rxjs/operators";
 import { SaleState } from "./sale.state";
 import { Sale, Product } from "src/app/models/sale.model";
-import HistorySales, { HistorySatateModel, ProductHistory } from "src/app/models/history.model";
+import HistorySales, {
+  HistorySatateModel,
+  ProductHistory
+} from "src/app/models/history.model";
 import * as _ from "lodash";
 
 @State<HistorySatateModel>({
@@ -94,8 +97,7 @@ export class HistorySatate {
     //startCount = Date.now();
 
     const calcProductsByDate = (products: Product[]) => {
-      return _(products).reduce(
-        (acc: [number, number], p) => {
+      return _(products).reduce((acc, p) => {
           acc[0] += p.count;
           acc[1] += p.count * p.price;
           return acc;
@@ -104,7 +106,7 @@ export class HistorySatate {
       );
     };
 
-    const calcSalesByDate = (sales: Sale[]):ProductHistory[] => {
+    const calcSalesByDate = (sales: Sale[]): ProductHistory[] => {
       return _(sales)
         .reduce((acc, s) => acc.concat(s.productList), _<Product>([]))
         .groupBy(p => p.name)
@@ -121,13 +123,14 @@ export class HistorySatate {
       .orderBy(["timestamp"], "asc")
       .groupBy(iterateeView)
       .toPairs()
-      .map(([date, sales]) => {
-        // debugger;
-        let discount: number = _.reduce(sales, (acc, s) => acc + s.discount, 0);
-        let calcSales = sales.length;
-        let products = calcSalesByDate(sales);
-        return { date, discount, products };
-      })
+      .map(
+        ([date, sales]): HistorySales => {
+          let numSales = sales.length;
+          let products = calcSalesByDate(sales);
+          let discount: number = _(sales).reduce((acc, s) => acc + s.discount, 0);
+          return { date, discount, numSales, products };
+        }
+      )
       .value();
 
     //endCount = Date.now();

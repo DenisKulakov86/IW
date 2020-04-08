@@ -66,7 +66,8 @@ export class NavigationComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   links = [
     { name: "Продажи", patch: "/sale-list" },
-    { name: "История", patch: "/history" }
+    { name: "История", patch: "/history" },
+    { name: "Прогноз", patch: "/forecast" }
   ];
 
   isHandset$: Observable<boolean> = this.breakpointObserver

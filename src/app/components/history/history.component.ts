@@ -88,6 +88,7 @@ export class HistoryComponent implements OnInit, AfterViewInit {
   historys$: Observable<any>;
   destroy$: Subject<void> = new Subject();
   stop$: Subject<any> = new Subject();
+
   constructor(
     private genereteService: GeneratorBase,
     private store: Store,
@@ -104,6 +105,8 @@ export class HistoryComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {}
 
   ngOnInit() {
+    this.store.select(HistorySatate.getHistory).subscribe(h => console.log(h));
+
     const scroll$ = fromEvent(document.body, "scroll");
     const more$ = scroll$.pipe(
       throttleTime(10),
@@ -134,9 +137,8 @@ export class HistoryComponent implements OnInit, AfterViewInit {
       return historyAsStream(history).pipe(
         takeUntil(this.stop$),
         repeatWhen(() => more$),
-        scan((acc: HistorySales[], cur) => [...acc, cur], []),
         startWith([]),
-        tap(console.log)
+        scan((acc: HistorySales[], cur) => [...acc, cur]),
       );
     };
     this.historys$ = this.store.select(HistorySatate.getHistory).pipe(

@@ -7,8 +7,6 @@
         <p *ngIf="!descriptionDate" class="date-description">Сегодня</p>
     </div>
 
-    
-
     <mat-action-list [@salesListAnim]="anim? true : false">
         <mat-list-item (click)="onSelect(s.id, i + 1)" *ngFor=" let s of (sales$ | async); let i = index">
 

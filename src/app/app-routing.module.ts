@@ -9,6 +9,7 @@ import { SaleDetailComponent } from "./components/sale-list/sale-detail/sale-det
 import { AuthGuard } from "./guard/auth.guard";
 import { AppComponent } from "./app.component";
 import { ExitSaleDetailGuard } from "./guard/sale-detail.exit.guard";
+import { ForecastComponent } from "./components/forecast/forecast.component";
 
 const routesSection: Routes = [
   { path: "", redirectTo: "sale-list", pathMatch: "full" },
@@ -21,6 +22,11 @@ const routesSection: Routes = [
     path: "history",
     component: HistoryComponent,
     data: { animation: "HistoryAnim" }
+  },
+  {
+    path: "forecast",
+    component: ForecastComponent,
+    data: { animation: "ForecastAnim" }
   }
 ];
 // children: routesSection
