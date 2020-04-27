@@ -5,7 +5,7 @@ import {
   OnDestroy,
   ChangeDetectionStrategy,
   ElementRef,
-  ChangeDetectorRef
+  ChangeDetectorRef,
 } from "@angular/core";
 
 import { Location } from "@angular/common";
@@ -27,7 +27,7 @@ import {
   tap,
   mapTo,
   catchError,
-  switchMapTo
+  switchMapTo,
 } from "rxjs/operators";
 import {
   FormBuilder,
@@ -36,7 +36,7 @@ import {
   FormControl,
   FormArray,
   FormGroupDirective,
-  NgForm
+  NgForm,
 } from "@angular/forms";
 import { Store, Select } from "@ngxs/store";
 import { SaleState } from "src/app/store/state/sale.state";
@@ -44,7 +44,7 @@ import { Sale, Product } from "src/app/models/sale.model";
 import {
   ChangeSale,
   NewSale,
-  SaveSale
+  SaveSale,
   // SelectSale
 } from "src/app/store/actions/sale.actions";
 import { MatExpansionPanel } from "@angular/material/expansion";
@@ -54,6 +54,7 @@ import { Title } from "@angular/platform-browser";
 import { ErrorStateMatcher } from "@angular/material/core";
 import { MatDialog } from "@angular/material/dialog";
 import { SaleDetailModalDialogComponent } from "./sale-detail-modal-dialog.component";
+import { ModalDialogComponent } from "../../modal-dialog/modal-dialog.component";
 
 export class ErrorStateDiscount implements ErrorStateMatcher {
   isErrorState(
@@ -72,7 +73,7 @@ export class ErrorStateDiscount implements ErrorStateMatcher {
 @Component({
   selector: "app-sale-detail",
   templateUrl: "./sale-detail.component.html",
-  styleUrls: ["./sale-detail.component.scss"]
+  styleUrls: ["./sale-detail.component.scss"],
   // changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SaleDetailComponent
@@ -125,9 +126,9 @@ export class SaleDetailComponent
     this.activeRoute.paramMap
       .pipe(
         pluck("params", "id"),
-        map(id => (isNaN(+id) ? "Новая продажа" : "Продажа N " + id))
+        map((id) => (isNaN(+id) ? "Новая продажа" : "Продажа N " + id))
       )
-      .subscribe(title => {
+      .subscribe((title) => {
         this.title = title;
         this.titleServise.setTitle(title);
       });
@@ -138,15 +139,15 @@ export class SaleDetailComponent
     this.formSale = this.fb.group(
       {
         discount: ["", [Validators.min(0)]],
-        productList: this.fb.array([])
+        productList: this.fb.array([]),
       },
       {
-        validators: this.formValidator
+        validators: this.formValidator,
         // asyncValidators: this.asuncFormValidator
       }
     );
 
-    this.store.selectOnce(SaleState.select).subscribe(s => {
+    this.store.selectOnce(SaleState.select).subscribe((s) => {
       this.date = Number(s.timestamp);
       let lenght = s.productList.length || 0;
       while (lenght--) {
@@ -157,14 +158,14 @@ export class SaleDetailComponent
 
     this.formSale.valueChanges
       .pipe(
-        filter(_ => this.formSale.valid),
+        filter((_) => this.formSale.valid),
         debounceTime(300),
         distinctUntilChanged(
           (v1, v2) => JSON.stringify(v1) === JSON.stringify(v2)
         ),
         takeUntil(this.destroy$)
       )
-      .subscribe(value => this.store.dispatch(new ChangeSale(value)));
+      .subscribe((value) => this.store.dispatch(new ChangeSale(value)));
 
     /**
      * NEW PRODUCT  FORM
@@ -172,11 +173,11 @@ export class SaleDetailComponent
     this.formNewProduct = this.createFormProduct();
 
     /**
-     * Shodow Header
+     * Shadow Header
      */
     this.isShodow$ = fromEvent(document.body, "scroll").pipe(
       map((ev: Event) => (ev.target as HTMLElement).scrollTop),
-      map(top => (top > 10 ? true : false)),
+      map((top) => (top > 10 ? true : false)),
       distinctUntilChanged()
     );
     /**
@@ -247,23 +248,31 @@ export class SaleDetailComponent
 
   exit() {
     if (this.formSale.invalid && this.formSale.dirty) {
-      let dialogRef = this.dialog.open(SaleDetailModalDialogComponent, {
+
+      let dialogRef = this.dialog.open(ModalDialogComponent, {
         minWidth: "200px",
-        data: "Данны не верны. Выход будет без сохранения!",
-        panelClass: "no-padding"
+        data:{
+          type: "question",
+          payload: "Данны не верны. Выход будет без сохранения!"
+        },
+        panelClass: "no-padding",
       });
       return dialogRef.afterClosed();
     }
 
     let saved = this.store.selectSnapshot(SaleState.saved);
     if (!saved) {
-      let dialogRef = this.dialog.open(SaleDetailModalDialogComponent, {
+
+      let dialogRef = this.dialog.open(ModalDialogComponent, {
         minWidth: "200px",
-        data: "Сохранить изменения?",
-        panelClass: "no-padding"
+        data:{
+          type: "question",
+          payload: "Сохранить изменения?"
+        },
+        panelClass: "no-padding",
       });
       return dialogRef.afterClosed().pipe(
-        switchMap(result => {
+        switchMap((result) => {
           return result ? this.save().pipe(mapTo(true)) : of(true);
         })
       );
@@ -277,10 +286,10 @@ export class SaleDetailComponent
       {
         name: ["", [Validators.required, Validators.minLength(3)]],
         count: ["", [Validators.required, Validators.min(1)]],
-        price: ["", [Validators.required, Validators.min(1)]]
+        price: ["", [Validators.required, Validators.min(1)]],
       },
       {
-        validators: Validators.required
+        validators: Validators.required,
       }
     );
     //form.patchValue(product);

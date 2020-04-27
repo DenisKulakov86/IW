@@ -51,6 +51,10 @@ export class ContentViewComponent implements OnInit {
         this.titleServise.setTitle("Настройки");
         this.title = "Настройки";
         break;
+      case "/forecast":
+        this.titleServise.setTitle("Прогноз");
+        this.title = "Прогноз";
+        break;
       default:
         this.titleServise.setTitle("iw");
         this.title = "";

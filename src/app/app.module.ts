@@ -41,12 +41,13 @@ import { AngularFireAuthModule } from "@angular/fire/auth";
 // import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireDatabaseModule } from "@angular/fire/database";
 import { AuthState } from "./store/state/auth.state";
-import { resolve } from 'url';
-import { timer } from 'rxjs';
-import { ContentViewComponent } from './components/navigation/content-view/content-view.component';
-import { RouterHandlerService } from './service/router-handler.service';
-import { SaleDetailModalDialogComponent } from './components/sale-list/sale-detail/sale-detail-modal-dialog.component';
-import { ForecastComponent } from './components/forecast/forecast.component';
+import { resolve } from "url";
+import { timer } from "rxjs";
+import { ContentViewComponent } from "./components/navigation/content-view/content-view.component";
+import { RouterHandlerService } from "./service/router-handler.service";
+import { SaleDetailModalDialogComponent } from "./components/sale-list/sale-detail/sale-detail-modal-dialog.component";
+import { ForecastComponent } from "./components/forecast/forecast.component";
+import { ModalDialogComponent } from "./components/modal-dialog/modal-dialog.component";
 
 //
 
@@ -58,7 +59,7 @@ export function noop() {
   //   console.log("APP_INITIALIZER");
   //   return resolve(true);
   // }, 1000))
-  return ()=> {}
+  return () => {};
 }
 
 @NgModule({
@@ -78,9 +79,14 @@ export function noop() {
     FlyDirective,
     ContentViewComponent,
     SaleDetailModalDialogComponent,
-    ForecastComponent
+    ForecastComponent,
+    ModalDialogComponent,
   ],
-  entryComponents: [HistoryModalDialogComponent, SaleDetailModalDialogComponent],
+  entryComponents: [
+    HistoryModalDialogComponent,
+    SaleDetailModalDialogComponent,
+    ModalDialogComponent,
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -96,29 +102,23 @@ export function noop() {
     AngularFireDatabaseModule,
     //
     NgxsModule.forRoot(
-      [
-        AuthState,
-        NameProductsSate,
-        SaleState,
-        ConfigState,
-        HistorySatate
-      ],
+      [AuthState, NameProductsSate, SaleState, ConfigState, HistorySatate],
       {
         developmentMode: !environment.production,
         selectorOptions: {
           suppressErrors: false,
-          injectContainerState: false
-        }
+          injectContainerState: false,
+        },
       }
     ),
     NgxsStoragePluginModule.forRoot({
       key: [
         ConfigState,
-        HistorySatate, 
+        HistorySatate,
         AuthState,
-        "sales.select"
+        "sales.select",
         // SaleState
-      ]
+      ],
       // storage: StorageOption.SessionStorage
     }),
     !environment.production ? NgxsReduxDevtoolsPluginModule.forRoot() : [],
@@ -129,20 +129,21 @@ export function noop() {
     {
       provide: APP_INITIALIZER,
       useFactory: noop,
-      deps:[RouterHandlerService],
-      multi: true
-    }],
-  bootstrap: [AppComponent]
+      deps: [RouterHandlerService],
+      multi: true,
+    },
+  ],
+  bootstrap: [AppComponent],
 })
 export class AppModule {
   overlayTheme: string[] = [];
   constructor(overlayContainer: OverlayContainer, private store: Store) {
-    store.select(ConfigState.theme).subscribe(theme => {
-      this.overlayTheme.forEach(t =>
+    this.store.select(ConfigState.theme).subscribe((theme) => {
+      this.overlayTheme.forEach((t) =>
         overlayContainer.getContainerElement().classList.remove(t)
       );
       this.overlayTheme = theme.split(" ");
-      this.overlayTheme.forEach(t =>
+      this.overlayTheme.forEach((t) =>
         overlayContainer.getContainerElement().classList.add(t)
       );
     });

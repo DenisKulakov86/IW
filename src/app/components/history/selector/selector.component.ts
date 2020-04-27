@@ -2,21 +2,19 @@ import {
   Component,
   OnInit,
   OnDestroy,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
 import { HistoryModalDialogComponent } from "./history-modal-dialog.component";
 import { Store, Select, Selector } from "@ngxs/store";
-import {
-  HistorySatate,
-} from "src/app/store/state/history.state";
+import { HistorySatate } from "src/app/store/state/history.state";
 import { Observable, Subject, combineLatest } from "rxjs";
 import {
   SetHistory,
   SetPeriod,
   ToggleReverse,
-  SetView
+  SetView,
 } from "src/app/store/actions/history.action";
 import * as moment from "moment";
 import {
@@ -26,14 +24,15 @@ import {
   tap,
   filter,
   startWith,
-  switchMap
+  switchMap,
 } from "rxjs/operators";
+import { ModalDialogComponent } from "../../modal-dialog/modal-dialog.component";
 
 function instrument<T>(source: Observable<T>) {
-  return new Observable<T>(observer => {
+  return new Observable<T>((observer) => {
     console.log("source: subscribing");
     const subscription = source
-      .pipe(tap(value => console.log("source emit: ", value)))
+      .pipe(tap((value) => console.log("source emit: ", value)))
       .subscribe(observer);
     return () => {
       subscription.unsubscribe();
@@ -46,7 +45,7 @@ function instrument<T>(source: Observable<T>) {
   selector: "app-selector",
   templateUrl: "./selector.component.html",
   styleUrls: ["./selector.component.scss"],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SelectorComponent implements OnInit, OnDestroy {
   dateFrom: FormControl = new FormControl();
@@ -100,35 +99,45 @@ export class SelectorComponent implements OnInit, OnDestroy {
   }
 
   openDialodPeriod() {
-    let dialogRef = this.dialog.open(HistoryModalDialogComponent, {
+    let dialogRef = this.dialog.open(ModalDialogComponent, {
       minWidth: "300px",
       data: {
-        period: this.store.selectSnapshot(
-          HistorySatate.getValue("dialogPeriod")
-        ),
-        select: this.store.selectSnapshot(
-          HistorySatate.getValue("currentPeriod")
-        )
+        type: "radiobox",
+        payload: {
+          period: this.store.selectSnapshot(
+            HistorySatate.getValue("dialogPeriod")
+          ),
+          select: this.store.selectSnapshot(
+            HistorySatate.getValue("currentPeriod")
+          ),
+        },
       },
-      autoFocus: false
+      autoFocus: false,
       // hasBackdrop: false
     });
 
-    dialogRef.afterClosed().subscribe(select => {
+    dialogRef.afterClosed().subscribe((select) => {
       !isNaN(select) && this.store.dispatch(new SetPeriod(select));
     });
   }
 
   openDialodView() {
-    let dialogRef = this.dialog.open(HistoryModalDialogComponent, {
+    let dialogRef = this.dialog.open(ModalDialogComponent, {
       minWidth: "200px",
       data: {
-        period: this.store.selectSnapshot(HistorySatate.getValue("dialogView")),
-        select: this.store.selectSnapshot(HistorySatate.getValue("currentView"))
+        type: "radiobox",
+        payload: {
+          period: this.store.selectSnapshot(
+            HistorySatate.getValue("dialogView")
+          ),
+          select: this.store.selectSnapshot(
+            HistorySatate.getValue("currentView")
+          ),
+        },
       },
-      autoFocus: false
+      autoFocus: false,
     });
-    dialogRef.afterClosed().subscribe(select => {
+    dialogRef.afterClosed().subscribe((select) => {
       !isNaN(select) && this.store.dispatch(new SetView(select));
     });
   }
@@ -141,7 +150,7 @@ export class SelectorComponent implements OnInit, OnDestroy {
     this.store
       .select(HistorySatate.getValue(selector))
       .pipe(
-        switchMap(start => {
+        switchMap((start) => {
           control.patchValue(start);
           return control.valueChanges.pipe(
             startWith(start),
@@ -152,6 +161,6 @@ export class SelectorComponent implements OnInit, OnDestroy {
         }),
         takeUntil(this.destroy$)
       )
-      .subscribe(v => this.store.dispatch(new SetHistory(selector, v)));
+      .subscribe((v) => this.store.dispatch(new SetHistory(selector, v)));
   }
 }

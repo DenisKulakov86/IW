@@ -1,0 +1,20 @@
+<ng-container [ngSwitch]="data.type">
+    <ng-template ngSwitchCase="question">
+        <div mat-dialog-content>
+            {{ data.payload }}
+        </div>
+
+        <div mat-dialog-actions>
+            <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Да</button>
+            <button mat-button [mat-dialog-close]="false">Нет</button>
+        </div>
+    </ng-template>
+    <ng-template ngSwitchCase="radiobox">
+        <mat-radio-group class="radio-group">
+            <mat-radio-button class="radio-button" *ngFor="let period of data.payload.period; let i = index"
+                [value]="period" [checked]="i == data.payload.select" [mat-dialog-close]="i">
+                {{ period }}
+            </mat-radio-button>
+        </mat-radio-group>
+    </ng-template>
+</ng-container>
